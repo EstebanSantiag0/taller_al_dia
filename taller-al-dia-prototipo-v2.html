@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Taller al Día | Prototipo v2 · Recepción y Óscar</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body { overscroll-behavior: none; }
+  ::-webkit-scrollbar { display: none; }
+  @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes popIn { from { transform: translateY(8px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes toastIn { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .slide-in { animation: slideIn .22s ease-out; }
+  .pop-in { animation: popIn .18s ease-out; }
+  .toast-in { animation: toastIn .2s ease-out; }
+  input[type=number]::-webkit-inner-spin-button { opacity: .4; }
+  /* Mejora UX: controles legibles y navegación accesible */
+  button, a, input, select, textarea { touch-action: manipulation; }
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #A3704C; outline-offset: 3px; }
+  button { min-height: 36px; }
+  #sidebar nav a { min-height: 48px; }
+  #uxHelp { position: fixed; right: 24px; bottom: 104px; z-index: 45; border: 1px solid #E2DDD3; background: #fff; color: #5F3718; border-radius: 999px; padding: 12px 18px; font: 700 13px 'Plus Jakarta Sans',sans-serif; box-shadow: 0 6px 24px #35261620; }
+  #uxHelp:hover { background:#F5EDE4; }
+  #uxTour { position:fixed; inset:0; z-index:100; background:#1c1c19a8; display:none; align-items:center; justify-content:center; padding:20px; }
+  #uxTour.open { display:flex; }
+  #uxTourCard { background:#fff; border-radius:26px; max-width:540px; width:100%; padding:30px; box-shadow:0 22px 80px #0003; }
+  .ux-step { display:inline-block; background:#F5EDE4; color:#5F3718; border-radius:999px; padding:7px 12px; font-size:12px; font-weight:700; }
+  .ux-action { border-radius:999px; padding:12px 18px; background:#7A4E2D; color:white; font-weight:700; }
+  .ux-secondary { border-radius:999px; padding:12px 18px; background:#F5F2EB; font-weight:700; }
+  #uxMobileMenu { display:none; }
+  @media(max-width:900px) {
+    #sidebar { transform:translateX(-100%); transition:transform .2s ease; width:min(85vw,300px); }
+    body.ux-nav-open #sidebar { transform:translateX(0); }
+    body.ux-nav-open #uxNavShade { display:block; }
+    #uxNavShade { display:none; position:fixed; inset:0; background:#0007; z-index:49; }
+    body > div.pl-64 { padding-left:0 !important; }
+    header { padding:12px 16px !important; height:auto !important; min-height:72px; gap:10px !important; }
+    #main { padding:20px 16px 110px !important; }
+    #uxMobileMenu { display:inline-flex; align-items:center; justify-content:center; min-width:44px; min-height:44px; background:white; border:1px solid #E2DDD3; border-radius:14px; }
+    #notifPanel { width:min(88vw,380px); right:-48px; }
+    #uxHelp { right:16px; bottom:92px; }
+  }
+  @media(prefers-reduced-motion:reduce) { *, *::before, *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; } }
+
+
+  /* UX para personal con poca experiencia digital: lectura, orientación y acciones claras */
+  :root { font-size: 17px; }
+  body { line-height: 1.55; }
+  #main { max-width: 1440px; }
+  #main .text-\[10px\], #main .text-\[11px\], #main .text-xs, #sidebar .text-xs { font-size: 13px !important; line-height: 1.5 !important; }
+  #main .text-sm, #sidebar .text-sm { font-size: 15px !important; line-height: 1.5 !important; }
+  #sidebar { width: 285px; overflow-y: auto; }
+  body > div.pl-64 { padding-left: 285px; }
+  #sidebar nav a { border-radius: 14px; min-height: 54px; font-weight: 650; }
+  button, input, select, textarea { font-size: 15px; }
+  button { min-height: 44px; }
+  input, select, textarea { accent-color: #7A4E2D; }
+  #orderSearchInput { border-radius: 14px; height: 54px; font-size: 15px; }
+  #uxHelp { font-size: 14px; min-height: 50px; }
+  #fab { width: auto !important; height: 60px !important; border-radius: 18px !important; padding: 0 22px !important; gap: 8px; font-size: 16px; font-weight: 800; }
+  #fab .material-symbols-outlined { font-size: 26px; }
+  .ux-home { background: #fff; border: 1px solid #ded5c9; border-radius: 24px; padding: 24px; box-shadow: 0 3px 14px #3628190b; }
+  .ux-home h1 { font-size: clamp(23px, 3vw, 32px); font-weight: 800; line-height: 1.2; color: #262019; }
+  .ux-home p { font-size: 15px; color: #544b41; margin-top: 8px; }
+  .ux-quick-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin-top: 20px; }
+  .ux-quick { display: flex; align-items: center; gap: 12px; padding: 17px; border-radius: 16px; border: 2px solid #e2d8ca; background: #faf7f2; text-align: left; font-weight: 750; color: #3b2b1f; min-height: 72px; }
+  .ux-quick:hover, .ux-quick:focus-visible { border-color: #7A4E2D; background: #f5ede4; }
+  .ux-quick .material-symbols-outlined { font-size: 27px; color: #754b2c; }
+  .ux-counts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+  .ux-count { padding: 10px 13px; border-radius: 12px; background: #f4f0e9; font-size: 14px; }
+  .ux-count strong { font-size: 19px; margin-right: 5px; }
+  .ux-hint { margin-top: 15px; padding: 12px 14px; background: #e9f3ec; border-radius: 12px; font-size: 14px; color: #264b38; }
+  .ux-chart-note { font-size: 13px; color: #51483f; margin-top: 10px; }
+  @media(max-width:1100px) { .ux-quick-grid { grid-template-columns: 1fr; } }
+  @media(max-width:900px) { #sidebar { width: min(85vw, 320px); } #fab { right: 14px; bottom: 16px; } #uxHelp { bottom: 88px; } .ux-home { padding: 18px; } }
+</style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "background": "#FAF7F2",
+          "surface": "#FAF7F2",
+          "surface-card": "#FFFFFF",
+          "surface-soft": "#F5F2EB",
+          "surface-muted": "#EFECE4",
+          "primary": "#7A4E2D",
+          "primary-dark": "#5F3718",
+          "primary-light": "#A3704C",
+          "primary-container": "#F5EDE4",
+          "on-primary": "#FFFFFF",
+          "secondary": "#7B5737",
+          "tertiary": "#27473B",
+          "tertiary-container": "#E7EFEA",
+          "tertiary-dark": "#1B352B",
+          "on-surface": "#1C1C19",
+          "on-surface-variant": "#63584F",
+          "outline": "#E2DDD3",
+          "outline-light": "#EAE5DC",
+          "error": "#BA1A1A",
+          "error-container": "#FDECEB",
+          "success": "#2D6A4F",
+          "success-container": "#E8F5EE",
+          "warning": "#9C5400",
+          "warning-container": "#FEF3E2",
+          "info": "#3D4F7A",
+          "info-container": "#ECEFF6"
+        },
+        fontFamily: {
+          sans: ["Plus Jakarta Sans", "sans-serif"],
+          serif: ["Newsreader", "serif"]
+        },
+        borderRadius: { 'pill': '9999px' }
+      }
+    }
+  }
+</script>
+</head>
+<body class="bg-background text-on-surface font-sans antialiased selection:bg-primary-container selection:text-primary min-h-screen flex">
+
+<div id="uxNavShade" onclick="uxCloseNav()"></div>
+<!-- BARRA LATERAL -->
+<aside id="sidebar" class="fixed left-0 top-0 h-full w-64 bg-surface-card border-r border-outline-light z-50 flex flex-col justify-between select-none"></aside>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div class="pl-64 flex-1 flex flex-col min-h-screen min-w-0">
+  <header class="sticky top-0 z-40 h-20 bg-background/90 backdrop-blur-md px-10 flex items-center justify-between gap-6 border-b border-outline-light/80">
+    <button id="uxMobileMenu" onclick="uxToggleNav()" aria-label="Abrir menú" title="Menú"><span class="material-symbols-outlined">menu</span></button>
+    <div class="w-full max-w-lg">
+      <div class="relative flex items-center">
+        <span class="material-symbols-outlined absolute left-4 text-on-surface-variant/70 text-[20px] pointer-events-none">search</span>
+        <input id="orderSearchInput" oninput="onSearch(this.value)" class="w-full h-11 pl-11 pr-14 rounded-full bg-surface-card border border-outline-light text-on-surface placeholder:text-on-surface-variant/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-xs" placeholder="Buscar por nombre, teléfono o número de orden" type="text" autocomplete="off"/>
+        <div class="absolute right-3.5 flex items-center pointer-events-none">
+          
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 shrink-0">
+      <span id="roleChip"></span>
+      <button id="connChip" onclick="toggleFail()" title="Solo prototipo: simular fallos de conexión"></button>
+      <div class="h-6 w-px bg-outline-light mx-1"></div>
+      <div class="flex items-center gap-1 text-on-surface-variant">
+        <div class="relative" id="notifWrap">
+          <button onclick="toggleNotif()" class="w-10 h-10 rounded-full hover:bg-surface-card flex items-center justify-center transition-colors text-on-surface-variant relative" title="Notificaciones">
+            <span class="material-symbols-outlined text-[20px]">notifications</span>
+            <span id="notifDot" class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-primary"></span>
+          </button>
+          <div id="notifPanel" class="hidden absolute right-0 top-12 w-[380px] bg-surface-card rounded-3xl border border-outline-light shadow-xl overflow-hidden pop-in"></div>
+        </div>
+        <button onclick="printComandas()" class="w-10 h-10 rounded-full hover:bg-surface-card flex items-center justify-center transition-colors text-on-surface-variant" title="Imprimir comandas">
+          <span class="material-symbols-outlined text-[20px]">print</span>
+        </button>
+      </div>
+    </div>
+  </header>
+  <main id="main" class="p-10 pb-32 flex flex-col gap-8 max-w-[1600px] w-full mx-auto"></main>
+</div>
+
+<button id="uxHelp" onclick="uxTourOpen()" aria-label="Ver guía de uso">ⓘ Guía rápida</button>
+<div id="uxTour" role="dialog" aria-modal="true" aria-labelledby="uxTourTitle" onclick="if(event.target===this)uxTourClose()">
+  <div id="uxTourCard">
+    <div class="flex justify-between items-center gap-3"><span id="uxTourCount" class="ux-step">Paso 1 de 5</span><button onclick="uxTourClose()" aria-label="Cerrar guía" class="text-2xl px-2">×</button></div>
+    <h2 id="uxTourTitle" class="font-serif text-3xl mt-5 mb-3">Conoce el sistema</h2>
+    <p id="uxTourText" class="text-base text-on-surface-variant leading-relaxed mb-6"></p>
+    <div class="flex justify-between gap-3"><button class="ux-secondary" onclick="uxTourClose()">Cerrar</button><div class="flex gap-2"><button id="uxTourBack" class="ux-secondary" onclick="uxTourMove(-1)">Anterior</button><button id="uxTourNext" class="ux-action" onclick="uxTourMove(1)">Siguiente</button></div></div>
+  </div>
+</div>
+<!-- BOTÓN FLOTANTE: NUEVA ORDEN -->
+<button id="fab" onclick="openNuevaOrden()" title="Nueva orden (N)" aria-label="Nueva orden"
+  class="fixed bottom-8 right-8 z-40 w-16 h-16 rounded-full bg-primary hover:bg-primary-dark text-on-primary shadow-lg shadow-primary/30 flex items-center justify-center transition-all hover:scale-105 active:scale-95">
+  <span class="material-symbols-outlined text-[30px]">add</span><span>Registrar bicicleta</span>
+</button>
+
+<div id="drawer"></div>
+<div id="modal"></div>
+<div id="toasts" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[95] flex flex-col gap-2 items-center pointer-events-none"></div>
+
+<script>
+/* =========================================================
+   UTILIDADES
+   ========================================================= */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money = n => '$' + Math.round(n).toLocaleString('es-MX');
+const sum = a => a.reduce((x, y) => x + y, 0);
+const clone = o => JSON.parse(JSON.stringify(o));
+const hhmm = () => new Date().toLocaleTimeString('es-MX', {hour:'2-digit', minute:'2-digit', hour12:false});
+const nowLbl = () => 'Hoy · ' + hhmm();
+const uid = p => p + '-' + Math.random().toString(36).slice(2, 7).toUpperCase();
+const ic = (n, s = 16, c = '') => `<span class="material-symbols-outlined text-[${s}px] ${c}">${n}</span>`;
+
+const LBL = 'text-[11px] uppercase font-bold tracking-wider text-on-surface-variant';
+const LBL10 = 'text-[10px] uppercase font-bold tracking-wider text-on-surface-variant';
+const INP = 'w-full h-10 px-3.5 rounded-xl bg-surface-card border border-outline-light text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
+const INPs = 'w-full h-9 px-3 rounded-xl bg-surface-card border border-outline-light text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all';
+const TA = 'w-full px-3.5 py-2.5 rounded-xl bg-surface-card border border-outline-light text-sm text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none';
+
+/* =========================================================
+   CATÁLOGOS Y DATOS DE EJEMPLO
+   (existencias y catálogo provisionales: pendientes de confirmar)
+   ========================================================= */
+const OWNER = 'Óscar Ramírez';
+const RECEP = 'Recepción';
+/* Cuentas del mostrador: Óscar y recepción son cuentas separadas (minuta v2).
+   Recepción: registrar clientes y bicicletas, presupuestos, cobros y entregas.
+   Óscar: todo lo de recepción + autorizar precios y correcciones, catálogo de servicios.
+   Supuesto por validar: asignar mecánicos, administrar inventario y ver estadísticas son solo de Óscar. */
+const ROLES = {
+  recepcion: {id:'recepcion', nombre:RECEP, ini:'RE', usuario:'recepcion', rol:'Recepción', perms:[]},
+  oscar:     {id:'oscar', nombre:OWNER, ini:'ÓR', usuario:'oscar', rol:'Propietario', perms:['precios', 'correcciones', 'servicios', 'asignar', 'inventario', 'estadisticas', 'revisar', 'config']},
+};
+const PERM_TXT = {precios:'autorizar precios', correcciones:'autorizar correcciones de inventario', servicios:'modificar el catálogo de servicios', asignar:'asignar mecánicos', inventario:'administrar el inventario', estadisticas:'ver estadísticas', revisar:'revisar cancelaciones con trabajo o pagos', config:'cambiar la configuración'};
+const VIEW_PERM = {inventario:'inventario', personal:'asignar', servicios:'servicios', estadisticas:'estadisticas', config:'config'};
+/* Bicicleta: solo los campos del flujo v0.3 (marca, tipo, color, rodada, número de serie si lo tiene). */
+const biciTxt = b => [b.marca, b.tipo, b.color, b.rodada ? 'R' + b.rodada : ''].filter(Boolean).join(' · ');
+const biciCorta = b => [b.marca, b.color].filter(Boolean).join(' · ');
+const MECH = {
+  MR: {id:'MR', nombre:'Mateo Ruiz', usuario:'mateo.ruiz'},
+  DP: {id:'DP', nombre:'David Peña', usuario:'david.pena'},
+  AL: {id:'AL', nombre:'Andrés Luna', usuario:'andres.luna'},
+};
+const mName = id => id ? MECH[id].nombre : '—';
+
+const ST = {
+  recibida:   {label:'Recibida',             chip:'bg-surface-muted text-on-surface-variant', dot:'bg-on-surface-variant'},
+  aprobacion: {label:'Esperando Aprobación', chip:'bg-warning-container text-warning',       dot:'bg-warning'},
+  reparacion: {label:'En Reparación',        chip:'bg-primary-container text-primary',       dot:'bg-primary'},
+  refaccion:  {label:'Esperando Refacción',  chip:'bg-info-container text-info',             dot:'bg-info'},
+  lista:      {label:'Lista para Entrega',   chip:'bg-success-container text-success',       dot:'bg-success'},
+  entregada:  {label:'Entregada',            chip:'bg-tertiary-container text-tertiary',     dot:'bg-tertiary'},
+  cancelada:  {label:'Cancelada',            chip:'bg-surface-muted text-on-surface-variant', dot:'bg-on-surface-variant/50'},
+};
+/* Grafo de estados de la ORDEN: solo estas transiciones están permitidas.
+   «Rechazado» es estado del PRESUPUESTO, no de la orden (minuta v2).
+   reparacion → refaccion ocurre cuando el registro de piezas se bloquea por falta de existencia (sección 4).
+   → cancelada se permite desde cualquier estado antes de Entregada (supuesto por validar), ver canGo. */
+const TRANS = {
+  recibida:   ['aprobacion'],
+  aprobacion: ['cancelada', 'reparacion', 'refaccion'],
+  refaccion:  ['reparacion'],
+  reparacion: ['aprobacion', 'lista', 'refaccion'],
+  lista:      ['entregada'],
+};
+
+const I = (id, tipo, variante, stock, precio, unidad = 'pz') => ({id, tipo, variante, stock, precio, unidad, min:null});
+const INV = [
+  I('cam26s','Cámara','R26 · 1.95" · Schrader',6,120),
+  I('cam29p','Cámara','R29 · 2.10" · Presta',4,150),
+  I('cam700p','Cámara','700 × 25c · Presta',3,140),
+  I('cam275s','Cámara','R27.5 · 2.20" · Schrader',0,140),
+  I('ll29','Llanta','R29 · 2.20"',2,650),
+  I('ll700','Llanta','700 × 25c',4,520),
+  I('ll26','Llanta','R26 · 1.95"',1,380),
+  I('cad8','Cadena','8 velocidades',3,280),
+  I('cad9','Cadena','9 velocidades',5,400),
+  I('cad11','Cadena','11 velocidades',1,780),
+  I('chf','Chicote de freno','Acero · universal',10,60),
+  I('chc','Chicote de cambios','Inoxidable · universal',8,70),
+  I('balv','Balatas','V-Brake (par)',6,170),
+  I('bals','Balatas','Disco · Shimano B01S',2,340),
+  I('balsr','Balatas','Disco · SRAM Level',0,420),
+  I('par','Parches','Vulcanizado',24,15),
+  I('lubs','Lubricante','Seco',2000,2,'ml'),
+  I('lubh','Lubricante','Húmedo',450,2,'ml'),
+];
+const TIPOS = ['Cámara','Llanta','Cadena','Chicote de freno','Chicote de cambios','Balatas','Parches','Lubricante'];
+
+const SERV = [
+  {id:'s1', nombre:'Ajuste general', precio:450, piezas:[{inv:'lubs', c:15}]},
+  {id:'s2', nombre:'Purga de frenos hidráulicos', precio:550, piezas:[]},
+  {id:'s3', nombre:'Reparación de ponchadura', precio:120, piezas:[{inv:'par', c:1}]},
+  {id:'s4', nombre:'Cambio de cámara', precio:80, piezas:[{inv:'cam26s', c:1}]},
+  {id:'s5', nombre:'Cambio de cadena', precio:100, piezas:[{inv:'cad9', c:1}]},
+  {id:'s6', nombre:'Ajuste de frenos', precio:280, piezas:[{inv:'balv', c:1}]},
+  {id:'s7', nombre:'Ajuste de desviador', precio:230, piezas:[{inv:'chc', c:1}]},
+  {id:'s8', nombre:'Overhaul / desarmado completo', precio:850, piezas:[{inv:'lubs', c:30}, {inv:'chf', c:2}, {inv:'chc', c:2}]},
+  {id:'s9', nombre:'Centrado de rueda', precio:200, piezas:[]},
+  {id:'s10', nombre:'Limpieza en tina ultrasónica', precio:350, piezas:[]},
+  {id:'s11', nombre:'Cambio de maza', precio:450, piezas:[]},
+];
+
+const MO = (d, p) => ({d, p});
+const RF = (inv, c, x = {}) => ({inv, c, p: INV.find(i => i.id === inv).precio, propia:false, ...x});
+const ESP = (d, p) => ({d, c:1, p, especial:true, llego:false, propia:false});
+const BT = (f, a, t, tag) => ({f, a, t, tag});
+const AS = (de, a, f, por = OWNER) => ({de, a, por, f});
+
+const ORDERS = [
+  {folio:'ORD-1089', estado:'lista', tiempo:'Lista hoy 09:15', cliente:{nombre:'Carlos Mendoza', tel:'55 4123 9871'},
+   bici:{marca:'Trek', tipo:'Montaña', color:'Negro mate', rodada:'29', serie:'WTU123C4567'},
+   llegada:'Cadena oxidada, los cambios brincan. Sin accesorios.', trabajo:'Ajuste general y cambio de cadena.',
+   mec:'MR', nota:['check_circle','Rodado OK','text-success'], piezasOk:true,
+   pres:[{v:1, estado:'aceptado', fecha:'01 nov', mo:[MO('Ajuste general',450)], ref:[RF('cad9',1)]}],
+   pagos:[{id:'PAG-0412', fecha:'01 nov · 10:10', monto:400, metodo:'Transferencia', estado:'guardado', tipo:'Anticipo'}],
+   asig:[AS(null,'MR','01 nov · 10:05')],
+   bit:[BT('01 nov · 10:02',RECEP,'Recibida en mostrador. Pide tenerla el martes.'), BT('01 nov · 10:05',OWNER,'Presupuesto v1 aceptado. Asignada a Mateo Ruiz.'), BT('Hoy · 09:15','Mateo Ruiz','Cadena cambiada y cambios ajustados. Prueba de rodado OK.')]},
+
+  {folio:'ORD-1084', estado:'lista', tiempo:'Lista ayer 17:40', cliente:{nombre:'Mariana Del Valle', tel:'55 9988 7766'},
+   bici:{marca:'Marin', tipo:'Urbana', color:'Verde olivo', rodada:'700c', serie:''},
+   llegada:'Frenos sin fuerza. Deja canastilla.', trabajo:'Ajuste de frenos.',
+   mec:'DP', nota:['check_circle','Listo','text-success'], piezasOk:true,
+   pres:[{v:1, estado:'aceptado', fecha:'02 nov', mo:[MO('Ajuste de frenos',280)], ref:[RF('balv',2)]}],
+   pagos:[{id:'PAG-0415', fecha:'02 nov · 12:30', monto:620, metodo:'Efectivo', estado:'guardado', tipo:'Liquidación'}],
+   asig:[AS(null,'DP','02 nov · 11:00')],
+   bit:[BT('02 nov · 10:48',RECEP,'Recibida. Deja canastilla.'), BT('02 nov · 17:40','David Peña','Balatas cambiadas y frenos ajustados.')]},
+
+  {folio:'ORD-1082', estado:'lista', tiempo:'Lista hoy 13:20', cliente:{nombre:'Jorge Salinas', tel:'55 3344 1290'},
+   bici:{marca:'Alubike', tipo:'Montaña', color:'Rojo', rodada:'26', serie:'ALB-77231'},
+   llegada:'Llanta delantera baja.', trabajo:'Revisar ponchadura delantera.',
+   mec:'AL', nota:['check_circle','Listo','text-success'], piezasOk:true,
+   pres:[{v:1, estado:'aceptado', fecha:'Hoy', mo:[MO('Cambio de cámara',80)], ref:[RF('cam26s',1)]}],
+   pagos:[], asig:[AS(null,'AL','Hoy · 10:30')],
+   bit:[BT('Hoy · 10:12',RECEP,'Recibida.'), BT('Hoy · 13:20','Andrés Luna','La cámara no tenía arreglo, se cambió.')]},
+
+  {folio:'ORD-1088', estado:'reparacion', tiempo:'Promesa: hoy 18:00', cliente:{nombre:'Valeria Sotomayor', tel:'55 1928 3746'},
+   bici:{marca:'Specialized', tipo:'Ruta', color:'Blanco', rodada:'700c', serie:'SPZ-AL-3321'},
+   llegada:'Llanta trasera gastada, rueda descentrada.', trabajo:'Ajuste de frenos, centrado y llanta nueva.',
+   mec:'DP', nota:['tune','En banco','text-primary'],
+   pres:[{v:1, estado:'aceptado', fecha:'02 nov', mo:[MO('Ajuste de frenos',280), MO('Centrado de rueda',200)], ref:[RF('ll700',1), RF('cam700p',1)]}],
+   pagos:[{id:'PAG-0416', fecha:'02 nov · 16:05', monto:1140, metodo:'Transferencia', estado:'guardado', tipo:'Liquidación'}],
+   asig:[AS(null,'DP','02 nov · 16:10')],
+   bit:[BT('02 nov · 16:00',RECEP,'Recibida. Pagó por adelantado.')]},
+
+  {folio:'ORD-1085', estado:'reparacion', tiempo:'Promesa: mañana 12:00', cliente:{nombre:'Esteban Pineda', tel:'55 6677 8899'},
+   bici:{marca:'BMC', tipo:'Ruta', color:'Rojo/Negro', rodada:'700c', serie:'BMC-TM-0091'},
+   llegada:'Muy sucia, transmisión desgastada.', trabajo:'Overhaul completo y cadena nueva.',
+   mec:'MR', nota:['construction','En limpieza','text-primary'],
+   pres:[{v:1, estado:'aceptado', fecha:'01 nov', mo:[MO('Overhaul / desarmado completo',850), MO('Limpieza en tina ultrasónica',350)], ref:[RF('cad11',1), RF('lubs',30)]}],
+   pagos:[{id:'PAG-0413', fecha:'01 nov · 13:00', monto:900, metodo:'Efectivo', estado:'guardado', tipo:'Anticipo'}],
+   asig:[AS(null,'DP','01 nov · 13:05'), AS('DP','MR','02 nov · 09:00')],
+   bit:[BT('01 nov · 12:50',RECEP,'Recibida.'), BT('02 nov · 09:00',OWNER,'Reasignada de David Peña a Mateo Ruiz (carga de trabajo).')]},
+
+  {folio:'ORD-1083', estado:'reparacion', tiempo:'Promesa: jue 13:00', cliente:{nombre:'Ana Torres', tel:'55 2211 4455'},
+   bici:{marca:'Mercurio', tipo:'Urbana', color:'Azul', rodada:'26', serie:''},
+   llegada:'Cambios no entran en los piñones grandes.', trabajo:'Ajuste de desviador.',
+   mec:'AL', nota:['search','Diagnóstico','text-primary'],
+   pres:[{v:1, estado:'aceptado', fecha:'02 nov', mo:[MO('Ajuste de desviador',230)], ref:[RF('chc',1)]}],
+   pagos:[], asig:[AS(null,'AL','02 nov · 15:20')],
+   bit:[BT('02 nov · 15:10',RECEP,'Recibida.')]},
+
+  {folio:'ORD-1080', estado:'reparacion', tiempo:'Promesa: hoy 19:00', cliente:{nombre:'Fernando Ríos', tel:'55 7012 3388'},
+   bici:{marca:'Trek', tipo:'Montaña', color:'Verde', rodada:'27.5', serie:'WTU991X2201'},
+   llegada:'Freno trasero rechina y no frena.', trabajo:'Purga de frenos y balatas nuevas.',
+   mec:'MR', nota:['water_drop','Purgando','text-primary'],
+   pres:[{v:1, estado:'aceptado', fecha:'31 oct', mo:[MO('Purga de frenos hidráulicos',550)], ref:[RF('balsr',1)]}],
+   pagos:[], asig:[AS(null,'MR','31 oct · 17:00')],
+   bit:[BT('31 oct · 16:45',RECEP,'Recibida.'), BT('Hoy · 11:02','Mateo Ruiz','Purga terminada. Falta colocar balatas.')]},
+
+  {folio:'ORD-1081', estado:'refaccion', tiempo:'Pieza llega: jue', cliente:{nombre:'Diego Herrera', tel:'55 4400 1122'},
+   bici:{marca:'Scott', tipo:'Montaña', color:'Blanco', rodada:'29', serie:'SC-AS-55410'},
+   llegada:'Maza trasera con juego y ruido.', trabajo:'Cambio de maza trasera.',
+   mec:'DP', nota:['local_shipping','Pieza pedida','text-info'],
+   pres:[{v:1, estado:'aceptado', fecha:'31 oct', mo:[MO('Cambio de maza',450)], ref:[ESP('Maza trasera Shimano Deore',1650)]}],
+   pagos:[{id:'PAG-0410', fecha:'31 oct · 12:15', monto:1050, metodo:'Transferencia', estado:'guardado', tipo:'Anticipo'}],
+   asig:[AS(null,'DP','31 oct · 12:20')],
+   bit:[BT('31 oct · 12:00',RECEP,'Recibida.'), BT('31 oct · 12:20',RECEP,'Aceptó presupuesto. Se pidió maza; dejó anticipo.')]},
+
+  {folio:'ORD-1087', estado:'aprobacion', tiempo:'WhatsApp hace 2h', cliente:{nombre:'Roberto Garza', tel:'55 8837 1920'},
+   bici:{marca:'Giant', tipo:'Montaña', color:'Gris', rodada:'27.5', serie:'GT-TL2-8812'},
+   llegada:'Rueda trasera con juego lateral.', trabajo:'Revisar ruido en rueda trasera.',
+   mec:null, nota:['schedule','Esperando','text-warning'],
+   pres:[{v:1, estado:'pendiente', fecha:'Hoy', mo:[MO('Cambio de maza',450)], ref:[ESP('Maza trasera Shimano',1650), ESP('Eje y baleros',350)]}],
+   pagos:[], asig:[],
+   bit:[BT('Hoy · 09:40',RECEP,'Recibida.'), BT('Hoy · 16:30',RECEP,'Presupuesto v1 enviado por WhatsApp.')]},
+
+  {folio:'ORD-1079', estado:'aprobacion', tiempo:'WhatsApp hace 25 min', cliente:{nombre:'Paola Jiménez', tel:'55 6120 7744'},
+   bici:{marca:'Benotto', tipo:'Montaña', color:'Rosa', rodada:'26', serie:''},
+   llegada:'Cambios desajustados.', trabajo:'Ajuste general.',
+   mec:'AL', nota:['pause_circle','Pausada','text-warning'],
+   pres:[
+     {v:1, estado:'aceptado', fecha:'31 oct', mo:[MO('Ajuste general',450)], ref:[RF('lubh',15)]},
+     {v:2, estado:'pendiente', fecha:'Hoy', adicional:true, motivo:'Llanta trasera con corte lateral.',
+      mo:[{...MO('Ajuste general',450), prev:true}, MO('Cambio de cámara',80)],
+      ref:[{...RF('lubh',15), prev:true}, RF('ll26',1), RF('cam26s',1)]}],
+   pagos:[], asig:[AS(null,'AL','31 oct · 18:00')],
+   bit:[BT('31 oct · 17:50',RECEP,'Recibida.'), BT('Hoy · 16:52','Andrés Luna','Daño adicional: llanta trasera con corte lateral.','daño'), BT('Hoy · 17:10',RECEP,'Presupuesto v2 enviado por WhatsApp. Conserva lo aprobado en v1.')]},
+
+  {folio:'ORD-1086', estado:'recibida', tiempo:'Hoy 11:20', cliente:{nombre:'Lucía Ferreyra', tel:'55 7102 9384'},
+   bici:{marca:'Cannondale', tipo:'Montaña', color:'Negro/Amarillo', rodada:'29', serie:'CN-TR5-4471'},
+   llegada:'Llanta trasera baja. Deja luz delantera.', trabajo:'Ponchadura trasera y ajuste de desviador.',
+   mec:null, pres:[], pagos:[], asig:[], bit:[BT('Hoy · 11:20',RECEP,'Recibida en mostrador. Deja luz delantera.')]},
+
+  {folio:'ORD-1090', estado:'recibida', tiempo:'Hoy 17:05', cliente:{nombre:'Miguel Ángel Cruz', tel:'55 9031 6620'},
+   bici:{marca:'Turbo', tipo:'BMX', color:'Cromo', rodada:'20', serie:''},
+   llegada:'Rayones en cuadro. Sin accesorios.', trabajo:'Revisar ruido en pedalier y frenos flojos.',
+   mec:null, pres:[], pagos:[], asig:[], bit:[BT('Hoy · 17:05',RECEP,'Recibida en mostrador.')]},
+
+  {folio:'ORD-1078', estado:'cancelada', devuelta:false, cancel:{motivo:'El cliente rechazó el presupuesto inicial.', por:RECEP, f:'Hoy · 12:30'}, tiempo:'Cancelada hoy 12:30', cliente:{nombre:'Sofía Vargas', tel:'55 5520 9087'},
+   bici:{marca:'Trek', tipo:'Urbana', color:'Azul marino', rodada:'700c', serie:''},
+   llegada:'Transmisión ruidosa.', trabajo:'Revisión general.',
+   mec:null, nota:['undo','Por devolver','text-error'],
+   pres:[{v:1, estado:'rechazado', fecha:'30 oct', mo:[MO('Overhaul / desarmado completo',850)], ref:[RF('cad9',1)]}],
+   pagos:[], asig:[], bit:[BT('30 oct · 10:00',RECEP,'Recibida.'), BT('Hoy · 12:30',RECEP,'Cliente rechazó presupuesto v1 (inicial). Orden cancelada; la bicicleta se devuelve sin cobro.')]},
+
+  {folio:'ORD-1077', estado:'entregada', semana:true, entregadaF:'02 nov', tiempo:'Entregada 02 nov · 13:10', cliente:{nombre:'Luis Navarro', tel:'55 1290 3345'},
+   bici:{marca:'Giant', tipo:'Urbana', color:'Gris', rodada:'700c', serie:''},
+   llegada:'Frenos gastados.', trabajo:'Ajuste de frenos.',
+   mec:'DP', piezasOk:true,
+   pres:[{v:1, estado:'aceptado', fecha:'30 oct', mo:[MO('Ajuste de frenos',280)], ref:[RF('balv',1)]}],
+   pagos:[{id:'PAG-0414', fecha:'02 nov · 13:08', monto:450, metodo:'Efectivo', estado:'guardado', tipo:'Liquidación'}],
+   asig:[AS(null,'DP','30 oct · 12:00')], bit:[BT('02 nov · 13:10',RECEP,'Entregada. Saldo en cero.')]},
+
+  {folio:'ORD-1075', estado:'entregada', entregadaF:'31 oct', tiempo:'Entregada 31 oct · 18:20', cliente:{nombre:'Gabriela Ortiz', tel:'55 8890 1123'},
+   bici:{marca:'Alubike', tipo:'Montaña', color:'Negro', rodada:'29', serie:''},
+   llegada:'Ponchada.', trabajo:'Reparar ponchadura.',
+   mec:'AL', piezasOk:true,
+   pres:[{v:1, estado:'aceptado', fecha:'31 oct', mo:[MO('Reparación de ponchadura',120)], ref:[RF('par',1)]}],
+   pagos:[{id:'PAG-0409', fecha:'31 oct · 18:18', monto:135, metodo:'Efectivo', estado:'guardado', tipo:'Liquidación'}],
+   asig:[AS(null,'AL','31 oct · 16:00')], bit:[BT('31 oct · 18:20',RECEP,'Entregada. Saldo en cero.')]},
+
+  {folio:'ORD-1091', estado:'aprobacion', tiempo:'Hoy 17:30', cliente:{nombre:'Rosa Medina', tel:'55 3020 4411'},
+   bici:{marca:'Mercurio', tipo:'Montaña', color:'Gris', rodada:'29', serie:''},
+   llegada:'Llanta trasera baja.', trabajo:'Ajuste general y cámara trasera. Cliente frecuente, pide descuento.',
+   mec:null, nota:['gavel','Precio por autorizar','text-warning'],
+   pres:[{v:1, estado:'pendiente', fecha:'Hoy', aut:'pendiente', mo:[{d:'Ajuste general', p:380, base:450}], ref:[{...RF('cam29p',1), base:150}]}],
+   pagos:[], asig:[],
+   bit:[BT('Hoy · 17:20',RECEP,'Recibida en mostrador.'), BT('Hoy · 17:30',RECEP,'Presupuesto v1 creado con precio ajustado. Espera autorización de Óscar.')]},
+
+  {folio:'ORD-1076', estado:'cancelada', revision:'pendiente', cancel:{motivo:'El cliente se cambió de ciudad y ya no quiere la reparación.', por:RECEP, f:'Hoy · 10:05'}, tiempo:'Cancelada hoy 10:05', cliente:{nombre:'Hugo Castañeda', tel:'55 4410 2287'},
+   bici:{marca:'Benotto', tipo:'Ruta', color:'Amarillo', rodada:'700c', serie:'BNT-0099812'},
+   llegada:'Cambios brincan, cadena gastada.', trabajo:'Cambio de cadena y ajuste de desviador.',
+   mec:'MR',
+   pres:[{v:1, estado:'aceptado', fecha:'31 oct', mo:[MO('Cambio de cadena',100), MO('Ajuste de desviador',230)], ref:[RF('cad8',1)]}],
+   pagos:[{id:'PAG-0411', fecha:'31 oct · 11:40', monto:300, metodo:'Efectivo', estado:'guardado', tipo:'Anticipo'}],
+   asig:[AS(null,'MR','31 oct · 11:45')],
+   bit:[BT('31 oct · 11:30',RECEP,'Recibida en mostrador.'), BT('31 oct · 11:45',OWNER,'Presupuesto v1 aceptado. Asignada a Mateo Ruiz.'), BT('Hoy · 10:05',RECEP,'Orden cancelada. Motivo: el cliente se cambió de ciudad. Ya hubo pago: pasa a revisión de Óscar.')]},
+];
+
+const S = {
+  role:'recepcion', view:'ordenes', search:'', orders:ORDERS, inv:INV, services:SERV,
+  correcciones:[
+    {id:'COR-012', mec:'DP', inv:'balv', mov:'Consumo en ORD-1084 (−2)', motivo:'Se usó solo 1 par; el otro lo trajo el cliente.', ajuste:1, estado:'pendiente', f:'Hoy · 12:48'},
+    {id:'COR-011', mec:'MR', inv:'lubs', mov:'Conteo físico', motivo:'Botella dañada, se derramó parte del lubricante.', ajuste:-120, estado:'pendiente', f:'Hoy · 10:20'},
+    {id:'COR-010', mec:'AL', inv:'par', mov:'Conteo físico', motivo:'Se encontró una caja de parches sin registrar.', ajuste:6, estado:'aprobada', por:OWNER, fAut:'31 oct · 19:00', f:'31 oct · 18:40'},
+  ],
+  movs:[
+    {f:'02 nov · 17:40', tipo:'Consumo', inv:'balv', cant:-2, ref:'ORD-1084', usuario:'David Peña', op:'OP-7H2KD'},
+    {f:'Hoy · 09:15', tipo:'Consumo', inv:'cad9', cant:-1, ref:'ORD-1089', usuario:'Mateo Ruiz', op:'OP-Q81ZA'},
+    {f:'Hoy · 13:20', tipo:'Consumo', inv:'cam26s', cant:-1, ref:'ORD-1082', usuario:'Andrés Luna', op:'OP-2MX0P'},
+    {f:'31 oct · 19:00', tipo:'Corrección', inv:'par', cant:6, ref:'COR-010', usuario:OWNER, op:'OP-L0V3R'},
+    {f:'30 oct · 11:00', tipo:'Entrada', inv:'ll700', cant:4, ref:'Compra', usuario:OWNER, op:'OP-90QWE'},
+  ].reverse(),
+  ops:[],
+  avisos:[{f:'Hoy · 16:52', folio:'ORD-1079', mec:'AL', txt:'Daño adicional: llanta trasera con corte lateral.'}],
+  failSim:false, presTab:'todos', invTab:'existencias',
+  drawer:null, drawerAnim:false, modal:null, cobroMetodo:'Efectivo',
+  mv:{mec:'MR', screen:'list', folio:null, msg:null},
+  stats:{weeks:[['14 sep',8450],['21 sep',9200],['28 sep',7600],['5 oct',11300],['12 oct',10150],['19 oct',12400],['26 oct',9800]], semana:{Efectivo:1850, Transferencia:1400}, terminadosBase:5},
+  anticipoPct:'', tallerNombre:'Taller al Día',
+};
+
+/* =========================================================
+   LÓGICA DE NEGOCIO
+   ========================================================= */
+const byFolio = f => S.orders.find(o => o.folio === f);
+const invOf = id => S.inv.find(i => i.id === id);
+const latest = o => o.pres[o.pres.length - 1];
+const accepted = o => [...o.pres].reverse().find(p => p.estado === 'aceptado');
+const lineTotal = r => r.propia ? 0 : r.p * r.c;
+const presTotal = p => p ? sum(p.mo.map(m => +m.p || 0)) + sum(p.ref.map(lineTotal)) : 0;
+const total = o => presTotal(accepted(o));
+const opById = id => S.ops.find(x => x.id === id);
+const payEstado = p => p.opId ? (opById(p.opId)?.estado || p.estado) : p.estado;
+const pagado = o => sum(o.pagos.filter(p => payEstado(p) === 'guardado').map(p => p.monto));
+const saldo = o => Math.max(0, total(o) - pagado(o));
+/* Cuenta activa en el mostrador y permisos */
+const me = () => ROLES[S.role].nombre;
+const can = p => ROLES[S.role].perms.includes(p);
+const canView = v => !VIEW_PERM[v] || can(VIEW_PERM[v]);
+const soloOscar = p => toast(`Solo Óscar puede ${PERM_TXT[p] || 'hacer esto'}. Cambia a su cuenta para continuar.`, 'warn');
+/* Cancelada: queda abierta mientras falte devolver la bici (presupuesto inicial rechazado) o la revisión de Óscar */
+const porDevolver = o => o.estado === 'cancelada' && o.devuelta === false;
+const enRevision = o => o.estado === 'cancelada' && o.revision === 'pendiente';
+const isClosed = o => o.estado === 'entregada' || (o.estado === 'cancelada' && !porDevolver(o) && !enRevision(o));
+const cancelable = o => !['entregada', 'cancelada'].includes(o.estado);
+const cancLabel = o => porDevolver(o) ? 'Cancelada · por devolver' : enRevision(o) ? 'Cancelada · revisión de Óscar' : (o.estado === 'cancelada' && o.devuelta) ? 'Cancelada · devuelta sin cobro' : null;
+const group = o => o.estado === 'lista' ? 0 : isClosed(o) ? 2 : 1;
+const MID = {reparacion:0, refaccion:1, aprobacion:2, recibida:3, cancelada:4};
+function sortOrders(l) {
+  return [...l].sort((a, b) => (group(a) - group(b)) || (group(a) === 1 ? (MID[a.estado] - MID[b.estado]) : 0) || b.folio.localeCompare(a.folio));
+}
+const canGo = (o, to) => to === 'cancelada' ? cancelable(o) : (TRANS[o.estado] || []).includes(to);
+function go(o, to, msg, autor = me()) {
+  if (!canGo(o, to)) { toast(`Transición no permitida: ${ST[o.estado].label} → ${ST[to].label}`, 'err'); return false; }
+  o.estado = to; if (msg) log(o, msg, autor); return true;
+}
+function log(o, t, a = me(), tag) { o.bit.push(BT(nowLbl(), a, t, tag)); }
+/* Precios: el precio base se ajusta en cada presupuesto; si recepción lo cambia, Óscar lo autoriza.
+   base === undefined → línea de datos de ejemplo (sin control); base === null → sin precio de catálogo. */
+const ajustado = l => !l.prev && !l.propia && l.base !== undefined && (l.base === null || +l.p !== +l.base);
+const autPend = p => !!p && p.aut === 'pendiente';
+const carga = id => S.orders.filter(o => o.mec === id && ['recibida','aprobacion','reparacion','refaccion'].includes(o.estado)).length;
+function refName(r) { if (!r.inv) return r.d || 'Pieza especial'; const it = invOf(r.inv); return `${it.tipo} ${it.variante}`; }
+function refLabel(r) {
+  if (!r.inv) return (r.d || 'Pieza especial') + (r.especial ? ' (pedido)' : '');
+  const it = invOf(r.inv); const q = it.unidad === 'ml' ? ` · ${r.c} ml` : (r.c > 1 ? ` ×${r.c}` : '');
+  return `${it.tipo} ${it.variante}${q}`;
+}
+function refSub(r) {
+  if (r.propia) return 'La trae el cliente · solo mano de obra, no se descuenta';
+  if (r.especial) return `Pedido especial${r.llego ? ' · llegó' : ' · por llegar'}`;
+  const it = invOf(r.inv); return `${r.c} ${it.unidad} × ${money(r.p)}`;
+}
+const insuf = r => !r.propia && ((r.especial && !r.llego) || (r.inv && r.c > invOf(r.inv).stock));
+function getUsadas(o) {
+  if (!o.usadas) { const ac = accepted(o); o.usadas = ac ? clone(ac.ref).map(r => { delete r.prev; return r; }) : []; }
+  return o.usadas;
+}
+function faltantes(o, p) { p = p || latest(o); return p ? p.ref.filter(r => !o.piezasOk && insuf(r)) : []; }
+const nextFolio = () => 'ORD-' + (Math.max(...S.orders.map(o => +o.folio.split('-')[1])) + 1);
+function assign(o, mec) {
+  if (o.mec === mec) return;
+  const de = o.mec; o.asig.push(AS(de, mec, nowLbl(), me()));
+  o.mec = mec;
+  log(o, de ? `Reasignada de ${mName(de)} a ${mName(mec)}.` : `Asignada a ${mName(mec)} como responsable.`);
+}
+
+/* Operaciones que no se aplican dos veces (pagos y confirmación de piezas) */
+function runOp(op) {
+  const ex = opById(op.id);
+  if (ex && ex.estado === 'guardado') { toast('Esta operación ya estaba guardada; no se aplica dos veces.', 'info'); return; }
+  if (ex && ex.estado === 'por_comprobar') { toast('Esta operación está por comprobar. Comprueba antes de repetirla.', 'warn'); return; }
+  const o = ex || op; if (!ex) S.ops.push(o);
+  if (!S.failSim) { o.apply(); o.estado = 'guardado'; toast(`${o.label} · Guardado`, 'ok'); refresh(); return; }
+  o.serverApplied = Math.random() < 0.5; o.estado = 'por_comprobar';
+  toast(`${o.label}: sin respuesta del servidor. Comprueba antes de repetir.`, 'warn'); refresh();
+}
+function checkOp(id) {
+  const op = opById(id); if (!op) return;
+  if (op.serverApplied) { op.apply(); op.estado = 'guardado'; toast(`Comprobado: ${op.id} sí se guardó. No es necesario repetir.`, 'ok'); }
+  else { op.estado = 'no_guardado'; toast(`Comprobado: ${op.id} no se guardó. Puedes reintentar.`, 'err'); }
+  refresh();
+}
+function retryOp(id) { const op = opById(id); if (!op || op.estado !== 'no_guardado') return; op.estado = 'reintentando'; S.ops = S.ops.filter(x => x !== op); runOp(op); }
+
+/* =========================================================
+   COMPONENTES
+   ========================================================= */
+const chip = (cls, txt, icon) => `<span class="px-2.5 py-0.5 rounded-full ${cls} text-[11px] font-semibold inline-flex items-center gap-1 whitespace-nowrap">${icon ? ic(icon, 13) : ''}${txt}</span>`;
+const stChip = (estado, label, sm) => { const s = ST[estado]; return `<span class="${sm ? 'px-2 py-0.5 text-[10px]' : 'px-3 py-1 text-xs'} rounded-full ${s.chip} font-semibold inline-flex items-center gap-1 whitespace-nowrap"><span class="w-1.5 h-1.5 rounded-full ${s.dot}"></span>${label || s.label}</span>`; };
+const presChip = e => e === 'pendiente' ? chip('bg-warning-container text-warning', 'Pendiente', 'schedule') : e === 'aceptado' ? chip('bg-success-container text-success', 'Aceptado', 'check') : chip('bg-error-container text-error', 'Rechazado', 'close');
+const opChip = e => ({guardado:chip('bg-success-container text-success','Guardado','cloud_done'), por_comprobar:chip('bg-warning-container text-warning','Por comprobar','sync_problem'), no_guardado:chip('bg-error-container text-error','No guardado','cloud_off'), enviando:chip('bg-surface-muted text-on-surface-variant','Enviando','sync')}[e] || '');
+const avatar = (id, size = 'w-6 h-6 text-[10px]') => id
+  ? `<div class="${size} rounded-full bg-primary-container text-primary font-bold flex items-center justify-center border border-primary/20 shrink-0">${id}</div>`
+  : `<div class="${size} rounded-full bg-surface-muted text-on-surface-variant font-bold flex items-center justify-center border border-outline-light shrink-0">--</div>`;
+const btn2 = (icon, label, on) => `<button onclick="event.stopPropagation();${on}" class="h-9 px-3 rounded-full bg-surface-soft hover:bg-surface-muted text-on-surface text-xs font-medium transition-colors flex items-center justify-center gap-1.5">${ic(icon, 16)}<span>${label}</span></button>`;
+const btn1 = (icon, label, on) => `<button onclick="event.stopPropagation();${on}" class="h-9 px-3 rounded-full bg-primary hover:bg-primary-dark text-on-primary text-xs font-semibold transition-all shadow-xs flex items-center justify-center gap-1">${ic(icon, 15)}<span>${label}</span></button>`;
+const btnO = (icon, label, on) => `<button onclick="event.stopPropagation();${on}" class="h-9 px-3 rounded-full bg-surface-card border border-outline hover:bg-surface-soft text-on-surface text-xs font-semibold transition-all flex items-center justify-center gap-1">${ic(icon, 15)}<span>${label}</span></button>`;
+const B1 = (label, on, icon, extra = '') => `<button onclick="${on}" ${extra} class="h-11 px-5 rounded-full bg-primary hover:bg-primary-dark text-on-primary text-sm font-semibold flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100">${icon ? ic(icon, 18) : ''}<span>${label}</span></button>`;
+/* Botón visible pero bloqueado: explica qué cuenta lo puede hacer */
+const btnW = (icon, label, msg) => `<button onclick="event.stopPropagation();toast('${msg}','info')" class="h-9 px-3 rounded-full bg-surface-soft/60 border border-dashed border-outline text-on-surface-variant text-xs font-medium flex items-center justify-center gap-1.5">${ic(icon, 15)}<span>${label}</span></button>`;
+const B2 = (label, on, icon) => `<button onclick="${on}" class="h-11 px-5 rounded-full bg-surface-soft hover:bg-surface-muted text-on-surface text-sm font-medium flex items-center justify-center gap-2 transition-colors">${icon ? ic(icon, 18) : ''}<span>${label}</span></button>`;
+const Bsm = (label, on, icon) => `<button onclick="${on}" class="h-8 px-3 rounded-full bg-surface-soft hover:bg-surface-muted text-on-surface text-xs font-medium flex items-center gap-1 transition-colors">${icon ? ic(icon, 15) : ''}${label}</button>`;
+const mHead = (title, sub) => `<div class="px-7 pt-6 pb-4 flex items-start justify-between gap-4 border-b border-outline-light"><div class="min-w-0"><h3 class="font-serif text-2xl tracking-tight">${title}</h3>${sub ? `<p class="text-sm text-on-surface-variant mt-0.5 truncate">${sub}</p>` : ''}</div><button onclick="closeModal()" class="w-9 h-9 rounded-full hover:bg-surface-soft flex items-center justify-center text-on-surface-variant shrink-0">${ic('close', 20)}</button></div>`;
+const mFoot = inner => `<div class="px-7 py-4 border-t border-outline-light flex items-center justify-end gap-2 bg-surface-soft/50 rounded-b-3xl">${inner}</div>`;
+const pageHead = (title, sub, right = '') => `<div class="flex flex-col md:flex-row md:items-end justify-between gap-4"><div><h1 class="font-serif text-3xl text-on-surface font-normal tracking-tight">${title}</h1><p class="text-sm text-on-surface-variant mt-0.5">${sub}</p></div><div class="flex items-center gap-2">${right}</div></div>`;
+const card = (inner, extra = '') => `<div class="bg-surface-card rounded-3xl border border-outline-light ${extra}">${inner}</div>`;
+const kpi = (label, val, sub, icon, cls = 'text-primary bg-primary-container') => card(`<div class="flex items-start justify-between"><div class="flex flex-col gap-1"><span class="${LBL10}">${label}</span><span class="font-serif text-3xl tracking-tight">${val}</span><span class="text-[11px] text-on-surface-variant">${sub}</span></div><div class="w-10 h-10 rounded-2xl ${cls} flex items-center justify-center">${ic(icon, 20)}</div></div>`, 'p-5');
+const tabs = (list, cur, fn) => `<div class="inline-flex items-center gap-1 p-1 rounded-full bg-surface-card border border-outline-light">${list.map(([k, l]) => `<button onclick="${fn}('${k}')" class="px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${k === cur ? 'bg-primary text-on-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-soft'}">${l}</button>`).join('')}</div>`;
+const toggle = (on, fn) => `<button onclick="${fn}" class="w-11 h-6 rounded-full ${on ? 'bg-primary' : 'bg-outline'} relative transition-colors shrink-0"><span class="absolute top-0.5 ${on ? 'left-[22px]' : 'left-0.5'} w-5 h-5 rounded-full bg-white shadow transition-all"></span></button>`;
+
+function presLines(p) {
+  const moT = sum(p.mo.map(m => +m.p || 0)), rfT = sum(p.ref.map(lineTotal));
+  const adj = l => !ajustado(l) ? '' : `<span class="ml-1.5 text-[10px] font-semibold ${p.aut === 'pendiente' ? 'text-warning bg-warning-container' : 'text-on-surface-variant bg-surface-muted'} px-1.5 py-0.5 rounded-full">${l.base === null ? 'sin precio de catálogo' : `ajustado · base ${money(l.base)}`}</span>`;
+  const row = (d, sub, v, prev, l) => `<div class="flex items-start justify-between gap-3 text-xs"><div class="min-w-0"><span class="text-on-surface">${esc(d)}</span>${prev ? `<span class="ml-1.5 text-[10px] font-semibold text-on-surface-variant bg-surface-muted px-1.5 py-0.5 rounded-full">aprobado antes</span>` : ''}${adj(l)}${sub ? `<div class="text-[11px] text-on-surface-variant">${sub}</div>` : ''}</div><span class="font-mono font-medium text-on-surface-variant shrink-0">${v}</span></div>`;
+  const autH = p.aut === 'pendiente' ? `<div class="rounded-xl bg-warning-container text-warning text-[11px] font-semibold px-3 py-2 mb-3 flex items-center gap-1.5">${ic('gavel', 14)} Precio ajustado por recepción: falta autorización de Óscar</div>`
+    : p.aut && p.aut.por ? `<div class="text-[11px] text-success font-medium mb-2 flex items-center gap-1">${ic('verified', 14)} Precios autorizados por ${esc(p.aut.por)} · ${esc(p.aut.f)}</div>` : '';
+  return `${autH}<div class="flex flex-col gap-1.5"><div class="${LBL10} flex justify-between"><span>Mano de obra</span><span class="font-mono">${money(moT)}</span></div>${p.mo.map(m => row(m.d, '', money(m.p), m.prev, m)).join('') || '<span class="text-xs text-on-surface-variant">—</span>'}</div>
+  <div class="flex flex-col gap-1.5 mt-3"><div class="${LBL10} flex justify-between"><span>Refacciones</span><span class="font-mono">${money(rfT)}</span></div>${p.ref.map(r => row(refName(r), refSub(r), r.propia ? 'Cliente' : money(lineTotal(r)), r.prev, r)).join('') || '<span class="text-xs text-on-surface-variant">—</span>'}</div>
+  <div class="flex items-center justify-between pt-2.5 mt-3 border-t border-outline-light text-sm"><span class="font-medium text-on-surface-variant">Total</span><strong class="font-mono">${money(moT + rfT)}</strong></div>`;
+}
+
+/* =========================================================
+   VISTA: ÓRDENES
+   ========================================================= */
+function finance(o) {
+  const lp = latest(o);
+  const T = v => `<strong class="text-on-surface font-mono">${money(v)}</strong>`;
+  if (o.estado === 'entregada') return [`Cobrado: ${T(total(o))}`, chip('bg-tertiary-container text-tertiary', `Entregada ${o.entregadaF}`, 'verified')];
+  if (o.estado === 'cancelada') {
+    if (porDevolver(o)) return ['Presupuesto rechazado', chip('bg-error-container text-error', 'Se devuelve sin cobro', 'money_off')];
+    if (enRevision(o)) return [`Pagado: ${T(pagado(o))}`, chip('bg-warning-container text-warning', 'Revisión de Óscar', 'gavel')];
+    return ['Orden cancelada', chip('bg-surface-muted text-on-surface-variant', o.devuelta ? 'Devuelta sin cobro' : 'Cancelada con motivo', 'block')];
+  }
+  if (!lp) return ['Sin presupuesto', chip('bg-surface-muted text-on-surface-variant', 'Por cotizar')];
+  if (autPend(lp)) return [`Cotizado: ${T(presTotal(lp))}`, chip('bg-warning-container text-warning', 'Precio por autorizar', 'gavel')];
+  if (lp.estado === 'pendiente') return [`Cotizado: ${T(presTotal(lp))}`, chip('bg-warning-container text-warning', lp.v > 1 ? `v${lp.v} sin respuesta` : 'Sin respuesta del cliente')];
+  const s = saldo(o), pg = pagado(o), L = `Total: ${T(total(o))}`;
+  if (s === 0) return [L, chip('bg-success-container text-success', 'Saldo en cero (Liquidado)', 'check')];
+  if (o.estado === 'lista') return [L, chip('bg-error-container text-error', `Resta ${money(s)} · entrega con $0`, 'lock')];
+  if (pg > 0) return [L, chip('bg-surface-muted text-on-surface-variant', `Abono ${money(pg)} · Resta ${money(s)}`)];
+  return [L, chip('bg-surface-muted text-on-surface-variant', 'Sin abonos')];
+}
+function cardActions(o) {
+  const A = a => `act('${a}','${o.folio}')`;
+  if (isClosed(o)) return [btn2('visibility', 'Ver Detalle', A('detalle')), btn2('receipt_long', 'Ticket', A('ticket'))];
+  const lp = latest(o);
+  switch (o.estado) {
+    case 'recibida':   return [btn2('qr_code', 'Etiqueta', A('etiqueta')), btn1('request_quote', 'Presupuestar', A('presupuestar'))];
+    case 'aprobacion':
+      if (autPend(lp)) return [btn2('edit', 'Editar', A('editarPres')), can('precios') ? btn1('gavel', 'Autorizar precios', A('autorizar')) : btnW('gavel', 'Espera a Óscar', 'Óscar debe autorizar el precio ajustado antes de enviarlo al cliente')];
+      return [btn2('send', 'WhatsApp', A('whatsapp')), btn1('how_to_reg', 'Respuesta', A('respuesta'))];
+    case 'reparacion': return [btn2('visibility', 'Ver Detalle', A('detalle')), btnO('report', 'Presup. adicional', A('adicional'))];
+    case 'refaccion':  return [btn2('visibility', 'Ver Detalle', A('detalle')), can('inventario') ? btn1('inventory', 'Llegó pieza', A('llego')) : btnW('inventory', 'Óscar registra la pieza', 'Administrar el inventario (registrar la llegada de la pieza) es de Óscar')];
+    case 'lista': { const s = saldo(o); return [btn2('history_edu', 'Bitácora', A('bitacora')), btn1(s > 0 ? 'payments' : 'task_alt', s > 0 ? 'Cobrar y Entregar' : 'Entregar', A('cobrar'))]; }
+    case 'cancelada':
+      if (porDevolver(o)) return [btn2('visibility', 'Ver Detalle', A('detalle')), btn1('undo', 'Devolver sin cobro', A('devolver'))];
+      return [btn2('visibility', 'Ver Detalle', A('detalle')), can('revisar') ? btn1('gavel', 'Revisar y cerrar', A('revisar')) : btnW('gavel', 'En revisión de Óscar', 'Ya hubo trabajo o pagos: Óscar revisa el caso antes de cerrarlo')];
+  }
+  return ['', ''];
+}
+function cardHTML(o) {
+  const closed = isClosed(o), lp = latest(o);
+  const label = cancLabel(o);
+  let resumen;
+  if (!lp) {
+    resumen = `<div class="rounded-2xl bg-surface-soft/80 border border-outline-light/60 p-3 flex flex-col gap-1.5"><span class="${LBL10}">Trabajo solicitado</span><p class="text-xs text-on-surface leading-relaxed">${esc(o.trabajo)}</p></div>`;
+  } else {
+    const lines = [...lp.mo.map(m => [m.d, money(m.p)]), ...lp.ref.map(r => [refLabel(r), r.propia ? 'Cliente' : money(lineTotal(r))])];
+    resumen = `<div class="rounded-2xl bg-surface-soft/80 border border-outline-light/60 p-3 flex flex-col gap-1.5">
+      <div class="flex items-center justify-between"><span class="${LBL10}">Resumen de Orden</span>${lp.v > 1 ? `<span class="text-[10px] font-semibold text-on-surface-variant">v${lp.v}${lp.estado === 'pendiente' ? ' · por aprobar' : ''}</span>` : ''}</div>
+      <div class="flex flex-col gap-1 text-xs">${lines.slice(0, 3).map(([d, v]) => `<div class="flex items-center justify-between gap-3 text-on-surface"><span class="truncate">${esc(d)}</span><span class="font-mono font-medium text-on-surface-variant shrink-0">${v}</span></div>`).join('')}${lines.length > 3 ? `<span class="text-[11px] text-on-surface-variant">+${lines.length - 3} más</span>` : ''}</div></div>`;
+  }
+  let mech;
+  if (o.mec) mech = `<div class="flex items-center gap-2">${avatar(o.mec)}<div class="flex flex-col"><span class="text-xs font-semibold text-on-surface leading-none">${mName(o.mec)}</span><span class="text-[10px] text-on-surface-variant">Mecánico asignado</span></div></div>`;
+  else if (o.estado === 'aprobacion') mech = `<div class="flex items-center gap-2">${avatar(null)}<span class="text-xs font-medium text-on-surface-variant italic">Óscar asigna tras la aprobación</span></div>`;
+  else mech = `<div class="flex items-center gap-2">${avatar(null)}<div class="flex flex-col"><span class="text-xs font-medium text-on-surface leading-none">Sin asignar</span><span class="text-[10px] text-on-surface-variant">${o.estado === 'recibida' ? 'Listo para presupuestar' : o.estado === 'cancelada' ? 'Sin responsable' : 'Óscar asigna al responsable'}</span></div></div>`;
+  let right = '';
+  if (!o.mec && !closed && !['recibida', 'aprobacion', 'cancelada'].includes(o.estado) && can('asignar')) right = `<button onclick="event.stopPropagation();act('asignar','${o.folio}')" class="text-[11px] text-primary font-semibold hover:underline">+ Asignar</button>`;
+  else if (o.nota && !closed) right = `<span class="text-[11px] ${o.nota[2]} font-medium flex items-center gap-0.5">${ic(o.nota[0], 14)} ${o.nota[1]}</span>`;
+  const [fl, fr] = finance(o), [a1, a2] = cardActions(o);
+  const pend = S.ops.some(x => x.folio === o.folio && x.estado !== 'guardado');
+  return `<article onclick="act('detalle','${o.folio}')" class="cursor-pointer ${closed ? 'bg-surface-card/70 opacity-80 hover:opacity-100' : 'bg-surface-card'} rounded-3xl p-6 border border-outline-light flex flex-col justify-between gap-5 hover:border-primary/40 hover:shadow-md transition-all duration-200">
+    <div class="flex flex-col gap-4">
+      <div class="flex items-center justify-between gap-2"><div class="flex items-center gap-2 min-w-0"><span class="font-mono text-xs font-bold text-primary tracking-wider bg-primary-container px-2.5 py-1 rounded-full shrink-0">#${o.folio}</span><span class="text-[11px] text-on-surface-variant truncate">${esc(o.tiempo)}</span></div>${stChip(o.estado, label)}</div>
+      <div><div class="flex items-baseline justify-between gap-2"><h2 class="text-base font-semibold text-on-surface tracking-tight truncate">${esc(o.cliente.nombre)}</h2><span class="text-xs font-medium text-primary bg-primary-container/60 px-2 py-0.5 rounded-full whitespace-nowrap" title="${esc(biciTxt(o.bici))}">${ic('pedal_bike', 13)} ${esc(biciCorta(o.bici))}</span></div>
+        <div class="flex items-center gap-1.5 text-xs text-on-surface-variant mt-0.5">${ic('call', 14)}<a onclick="event.stopPropagation()" class="hover:text-primary transition-colors" href="tel:${o.cliente.tel.replace(/\D/g, '')}">${esc(o.cliente.tel)}</a></div></div>
+      ${resumen}
+      <div class="flex items-center justify-between pt-1">${mech}${right}</div>
+      ${pend ? `<div class="rounded-xl bg-warning-container text-warning text-[11px] font-semibold px-3 py-2 flex items-center gap-1.5">${ic('sync_problem', 14)} Operación por comprobar</div>` : ''}
+    </div>
+    <div class="pt-4 border-t border-outline-light flex flex-col gap-3">
+      <div class="flex items-center justify-between gap-2 text-xs"><span class="text-on-surface-variant font-medium whitespace-nowrap">${fl}</span>${fr}</div>
+      <div class="grid grid-cols-2 gap-2">${a1}${a2}</div>
+    </div></article>`;
+}
+function uxInicio() {
+  const pendientes = S.orders.filter(o => !isClosed(o)).length;
+  const listas = S.orders.filter(o => o.estado === 'lista').length;
+  const presupuestos = S.orders.filter(o => latest(o)?.estado === 'pendiente' && !autPend(latest(o)) && o.estado === 'aprobacion').length;
+  const q = (on, icon, t) => `<button class="ux-quick" onclick="${on}"><span class="material-symbols-outlined">${icon}</span><span>${t}</span></button>`;
+  if (S.role === 'oscar') {
+    const precios = S.orders.filter(o => autPend(latest(o))).length;
+    const corr = S.correcciones.filter(c => c.estado === 'pendiente').length;
+    const sinMec = S.orders.filter(o => !o.mec && ['reparacion', 'refaccion'].includes(o.estado)).length;
+    const rev = S.orders.filter(enRevision).length;
+    return `<section class="ux-home" aria-label="Inicio de Óscar">
+      <h1>Hola, Óscar. Esto espera su autorización</h1>
+      <p>Su cuenta puede hacer todo lo de recepción y, además, autorizar, asignar y administrar.</p>
+      <div class="ux-quick-grid">
+        ${q(`goView('presupuestos','pendiente')`, 'gavel', `Autorizar precios ajustados (${precios})`)}
+        ${q(`goView('inventario','solicitudes')`, 'rule', `Autorizar correcciones de inventario (${corr})`)}
+        ${q(`goView('personal')`, 'group', `Asignar mecánicos (${sinMec} sin responsable)`)}
+      </div>
+      <div class="ux-counts" aria-label="Resumen de trabajo">
+        <span class="ux-count"><strong>${pendientes}</strong> reparaciones abiertas</span>
+        <span class="ux-count"><strong>${listas}</strong> listas para entregar</span>
+        <span class="ux-count"><strong>${rev}</strong> cancelaciones por revisar</span>
+      </div>
+      <div class="ux-hint">Asignar mecánicos, administrar inventario y ver estadísticas se dejaron solo en su cuenta (supuesto por validar con usted).</div>
+    </section>`;
+  }
+  return `<section class="ux-home" aria-label="Inicio de recepción">
+    <h1>¿Qué necesita hacer hoy?</h1>
+    <p>Cuenta de recepción: registrar clientes y bicicletas, hacer presupuestos, cobrar y entregar.</p>
+    <div class="ux-quick-grid">
+      ${q('openNuevaOrden()', 'add_circle', 'Recibir una bicicleta nueva')}
+      ${q(`goView('presupuestos','pendiente')`, 'request_quote', 'Revisar presupuestos')}
+      ${q(`onSearchGroup()`, 'payments', `Cobrar y entregar (${listas})`)}
+    </div>
+    <div class="ux-counts" aria-label="Resumen de trabajo">
+      <span class="ux-count"><strong>${pendientes}</strong> reparaciones abiertas</span>
+      <span class="ux-count"><strong>${listas}</strong> listas para entregar</span>
+      <span class="ux-count"><strong>${presupuestos}</strong> presupuestos esperando respuesta</span>
+    </div>
+    <div class="ux-hint">Consejo: para encontrar una bicicleta, escriba el número de orden, el nombre del cliente o su teléfono en el buscador de arriba.</div>
+  </section>`;
+}
+function onSearchGroup() { if (S.view !== 'ordenes') goView('ordenes'); setTimeout(() => $('grp0')?.scrollIntoView({behavior:'smooth', block:'start'}), 30); }
+function renderOrdenes() {
+  const q = S.search.trim().toLowerCase().replace(/^#/, ''), qd = q.replace(/\D/g, '');
+  let list = S.orders.filter(o => !q || o.folio.toLowerCase().includes(q) || o.cliente.nombre.toLowerCase().includes(q)
+    || (qd.length >= 3 && o.cliente.tel.replace(/\D/g, '').includes(qd)));
+  list = sortOrders(list);
+  const groups = [
+    {k:0, t:'Listas para entregar', dot:'bg-success'},
+    {k:1, t:'En proceso', dot:'bg-primary'},
+    {k:2, t:'Entregadas y cerradas', dot:'bg-tertiary'},
+  ];
+  let h = q ? '' : uxInicio();
+  if (q) h += `<div class="flex items-center justify-between text-sm text-on-surface-variant"><span>${list.length} resultado(s) para “<strong class="text-on-surface">${esc(S.search)}</strong>”</span><button onclick="clearSearch()" class="text-xs font-semibold text-primary hover:underline">Limpiar búsqueda</button></div>`;
+  if (!list.length) h += card(`<div class="flex flex-col items-center gap-2 text-center"><div class="w-12 h-12 rounded-2xl bg-surface-soft flex items-center justify-center text-on-surface-variant">${ic('search_off', 24)}</div><p class="text-sm font-semibold">Sin coincidencias</p><p class="text-xs text-on-surface-variant">Busca por folio, nombre del cliente o teléfono.</p></div>`, 'p-12');
+  groups.forEach(g => {
+    const items = list.filter(o => group(o) === g.k); if (!items.length) return;
+    h += `<section id="grp${g.k}" class="flex flex-col gap-4 scroll-mt-28"><div class="flex items-center gap-3"><span class="w-2 h-2 rounded-full ${g.dot}"></span><h2 class="${LBL}">${g.t}</h2><span class="text-[11px] font-semibold text-on-surface-variant/70">${items.length}</span><div class="flex-1 h-px bg-outline-light"></div></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${items.map(cardHTML).join('')}</div></section>`;
+  });
+  return h;
+}
+
+/* =========================================================
+   DETALLE DE ORDEN (panel lateral)
+   ========================================================= */
+const sec = (title, inner, right = '', id = '') => `<section ${id ? `id="${id}"` : ''} class="bg-surface-card rounded-3xl border border-outline-light p-5 flex flex-col gap-3"><div class="flex items-center justify-between gap-2"><h3 class="${LBL}">${title}</h3>${right}</div>${inner}</section>`;
+function flowHTML(o) {
+  const main = ['recibida', 'aprobacion', 'reparacion', 'lista', 'entregada'];
+  const lbl = {recibida:'Recibida', aprobacion:'Aprobación', reparacion:'Reparación', lista:'Lista', entregada:'Entregada'};
+  let idx = main.indexOf(o.estado); if (o.estado === 'refaccion') idx = 2; if (o.estado === 'cancelada') idx = -1;
+  const pills = main.map((s, i) => {
+    const done = i < idx || o.estado === 'entregada', now = main[i] === o.estado;
+    const cls = now ? 'bg-primary text-on-primary' : done ? 'bg-success-container text-success' : 'bg-surface-soft text-on-surface-variant';
+    return `<span class="px-2.5 py-1 rounded-full text-[11px] font-semibold ${cls} inline-flex items-center gap-1">${done && !now ? ic('check', 13) : ''}${lbl[s]}</span>`;
+  }).join(`<span class="text-on-surface-variant/40">${ic('chevron_right', 14)}</span>`);
+  const br = (e, t) => `<span class="px-2.5 py-1 rounded-full text-[11px] font-semibold ${o.estado === e ? ST[e].chip + ' ring-1 ring-current' : 'bg-surface-soft/60 text-on-surface-variant/70'}">${t}</span>`;
+  const next = [...new Set([...(TRANS[o.estado] || []), ...(cancelable(o) ? ['cancelada'] : [])])].map(t => ST[t].label).join(' · ');
+  return `<div class="flex flex-wrap items-center gap-1">${pills}</div>
+    <div class="flex flex-wrap items-center gap-2 text-[11px] text-on-surface-variant"><span>Ramas:</span>${br('refaccion', 'Esperando refacción')}${br('cancelada', 'Cancelada')}</div>
+    ${next ? `<p class="text-[11px] text-on-surface-variant">Siguientes estados permitidos: <strong class="text-on-surface">${next}</strong></p>` : ''}`;
+}
+function nextActions(o) {
+  const f = o.folio, A = a => `act('${a}','${f}')`;
+  switch (o.estado) {
+    case 'recibida':   return B1('Crear presupuesto', A('presupuestar'), 'request_quote') + B2('Imprimir etiqueta', A('etiqueta'), 'qr_code');
+    case 'aprobacion':
+      if (autPend(latest(o))) return (can('precios') ? B1('Autorizar precios', A('autorizar'), 'gavel') : `<span class="text-xs text-warning font-medium flex items-center gap-1">${ic('gavel', 15)} Óscar debe autorizar el precio ajustado antes de enviarlo al cliente.</span>`) + B2('Editar presupuesto', A('editarPres'), 'edit');
+      return B1('Registrar respuesta', A('respuesta'), 'how_to_reg') + B2('Editar presupuesto', A('editarPres'), 'edit') + B2('WhatsApp', A('whatsapp'), 'send');
+    case 'reparacion': return B2('Presupuesto adicional (daño)', A('adicional'), 'report') + `<span class="text-[11px] text-on-surface-variant flex items-center gap-1">${ic('smartphone', 14)} El mecánico confirma las piezas y la marca lista desde su celular.</span>`;
+    case 'refaccion':  return can('inventario') ? B1('Registrar llegada de pieza', A('llego'), 'inventory') : `<span class="text-xs text-on-surface-variant flex items-center gap-1">${ic('inventory', 15)} Óscar registra la llegada de la pieza en el inventario.</span>`;
+    case 'lista':      return B1(saldo(o) > 0 ? 'Cobrar y entregar' : 'Entregar', A('cobrar'), saldo(o) > 0 ? 'payments' : 'task_alt');
+    case 'cancelada':
+      if (porDevolver(o)) return B1('Devolver sin cobro', A('devolver'), 'undo');
+      if (enRevision(o)) return can('revisar') ? B1('Revisar y cerrar', A('revisar'), 'gavel') : `<span class="text-xs text-warning font-medium flex items-center gap-1">${ic('gavel', 15)} Ya hubo trabajo o pagos: Óscar revisa el caso antes de cerrarlo.</span>`;
+  }
+  return '';
+}
+function openDetail(f, focus) { S.drawer = f; S.drawerAnim = true; renderDetail(); if (focus) setTimeout(() => $(focus)?.scrollIntoView({behavior:'smooth', block:'start'}), 60); }
+function closeDetail() { S.drawer = null; $('drawer').innerHTML = ''; }
+function renderDetail() {
+  const o = byFolio(S.drawer); if (!o) { closeDetail(); return; }
+  const closed = isClosed(o), f = o.folio;
+  const scroll = $('detailScroll')?.scrollTop || 0;
+  const na = nextActions(o);
+  const info = (k, v) => `<div class="flex flex-col"><span class="text-[11px] text-on-surface-variant">${k}</span><span class="text-sm font-medium">${v ? esc(v) : '<span class="text-on-surface-variant/60">—</span>'}</span></div>`;
+  // presupuestos
+  const presH = o.pres.length ? [...o.pres].reverse().map((p, i) => `<div class="rounded-2xl border border-outline-light p-4 flex flex-col ${i > 0 ? 'bg-surface-soft/40' : ''}">
+      <div class="flex items-center justify-between gap-2 mb-3"><div class="flex items-center gap-2"><span class="font-mono text-xs font-bold">v${p.v}</span><span class="text-[11px] text-on-surface-variant">${p.fecha}${p.adicional ? ' · daño adicional' : ''}</span></div>${presChip(p.estado)}</div>
+      ${p.motivo ? `<div class="rounded-xl bg-warning-container/60 text-xs px-3 py-2 mb-3"><strong>Motivo:</strong> ${esc(p.motivo)}</div>` : ''}
+      ${presLines(p)}
+      ${p.estado === 'aceptado' && o.pres.some(x => x.v > p.v && x.estado === 'aceptado') ? `<p class="text-[11px] text-on-surface-variant mt-2">${ic('lock', 12)} Versión aceptada, conservada sin cambios.</p>` : ''}
+    </div>`).join('') : `<div class="flex items-center justify-between gap-3 rounded-2xl bg-surface-soft p-4"><p class="text-xs text-on-surface-variant">Aún no hay presupuesto.</p>${o.estado === 'recibida' ? Bsm('Crear presupuesto', `act('presupuestar','${f}')`, 'add') : ''}</div>`;
+  // piezas
+  const us = accepted(o) ? getUsadas(o) : [];
+  const piezasH = !accepted(o) ? '<p class="text-xs text-on-surface-variant">Se registran después de aprobar el presupuesto.</p>'
+    : `<div class="flex flex-col gap-2">${us.map(r => { const it = r.inv && invOf(r.inv), bad = !o.piezasOk && insuf(r);
+        return `<div class="flex items-center justify-between gap-3 text-xs"><div class="min-w-0"><span>${esc(refLabel(r))}</span><div class="text-[11px] text-on-surface-variant">${r.propia ? 'La trae el cliente' : r.especial ? (r.llego ? 'Pedido especial · llegó' : 'Pedido especial · por llegar') : `Existencia: ${it.stock} ${it.unidad}`}</div></div>${o.piezasOk ? chip('bg-success-container text-success', 'Descontada', 'check') : bad ? chip('bg-error-container text-error', 'Sin existencia', 'block') : chip('bg-surface-muted text-on-surface-variant', 'Por confirmar')}</div>`; }).join('') || '<span class="text-xs text-on-surface-variant">Sin refacciones.</span>'}
+      <p class="text-[11px] text-on-surface-variant pt-2 border-t border-outline-light">${o.piezasOk ? `Confirmadas y descontadas una sola vez${o.piezasOpId ? ` · ${o.piezasOpId}` : ''}.` : 'El mecánico registra las piezas que realmente usó. Se descuentan al confirmar, nunca dejan existencias negativas.'}</p></div>`;
+  // pagos
+  const pagosH = `<div class="grid grid-cols-3 gap-2 text-center">${[['Total', total(o)], ['Pagado', pagado(o)], ['Saldo', saldo(o)]].map(([k, v], i) => `<div class="rounded-2xl ${i === 2 ? (v > 0 ? 'bg-error-container text-error' : 'bg-success-container text-success') : 'bg-surface-soft'} py-3"><div class="text-[10px] uppercase font-bold tracking-wider opacity-80">${k}</div><div class="font-mono font-semibold text-base">${money(v)}</div></div>`).join('')}</div>
+    <div class="flex flex-col gap-1.5">${o.pagos.map(p => `<div class="flex items-center justify-between gap-2 text-xs ${payEstado(p) === 'no_guardado' ? 'line-through opacity-60' : ''}"><div><span class="font-medium">${p.tipo || 'Abono'}</span> <span class="text-on-surface-variant">· ${p.metodo} · ${p.fecha}</span></div><div class="flex items-center gap-2"><span class="font-mono font-semibold">${money(p.monto)}</span>${opChip(payEstado(p))}</div></div>`).join('') || '<span class="text-xs text-on-surface-variant">Sin pagos registrados.</span>'}</div>`;
+  const pagosBtn = closed || !accepted(o) ? '' : o.estado === 'lista' ? Bsm('Cobrar', `act('cobrar','${f}')`, 'payments') : Bsm('Registrar abono', `act('cobrar','${f}')`, 'add');
+  // mecánico
+  const mecH = `<div class="flex items-center justify-between gap-3">${o.mec ? `<div class="flex items-center gap-3">${avatar(o.mec, 'w-9 h-9 text-xs')}<div><div class="text-sm font-semibold">${mName(o.mec)}</div><div class="text-[11px] text-on-surface-variant">Responsable único · ${carga(o.mec)} órdenes activas</div></div></div>` : `<div class="flex items-center gap-3">${avatar(null, 'w-9 h-9 text-xs')}<span class="text-sm text-on-surface-variant italic">Sin asignar</span></div>`}
+      ${closed || o.estado === 'cancelada' ? '' : can('asignar') ? Bsm(o.mec ? 'Reasignar' : 'Asignar', `act('asignar','${f}')`, 'swap_horiz') : `<span class="text-[11px] text-on-surface-variant flex items-center gap-1">${ic('lock', 12)} Solo Óscar asigna</span>`}</div>
+    ${o.asig.length ? `<div class="flex flex-col gap-1 pt-2 border-t border-outline-light"><span class="${LBL10}">Historial de asignación</span>${[...o.asig].reverse().map(a => `<div class="text-[11px] text-on-surface-variant flex justify-between gap-2"><span>${a.de ? `${mName(a.de)} → <strong class="text-on-surface">${mName(a.a)}</strong>` : `Asignada a <strong class="text-on-surface">${mName(a.a)}</strong>`}</span><span>${a.por} · ${a.f}</span></div>`).join('')}</div>` : ''}`;
+  // bitácora
+  const bitH = `<div class="flex flex-col gap-3">${[...o.bit].reverse().map(b => `<div class="flex gap-3"><div class="w-2 h-2 rounded-full ${b.tag === 'daño' ? 'bg-warning' : 'bg-primary-light'} mt-1.5 shrink-0"></div><div class="min-w-0"><div class="text-[11px] text-on-surface-variant">${b.f} · <strong class="text-on-surface">${esc(b.a)}</strong>${b.tag === 'daño' ? ' ' + chip('bg-warning-container text-warning', 'Daño adicional') : ''}</div><p class="text-xs text-on-surface leading-relaxed">${esc(b.t)}</p></div></div>`).join('')}</div>
+    ${closed ? '' : `<div class="flex gap-2 pt-2 border-t border-outline-light"><input id="bitTxt" class="${INP}" placeholder="Agregar observación…" onkeydown="if(event.key==='Enter')addBit('${f}')"><button onclick="addBit('${f}')" class="h-10 w-10 shrink-0 rounded-full bg-primary text-on-primary flex items-center justify-center">${ic('arrow_upward', 18)}</button></div>`}`;
+
+  $('drawer').innerHTML = `<div class="fixed inset-0 z-[60] bg-on-surface/20" onclick="closeDetail()"></div>
+  <aside class="fixed right-0 top-0 h-full w-full max-w-[640px] z-[61] bg-background border-l border-outline-light shadow-2xl flex flex-col ${S.drawerAnim ? 'slide-in' : ''}">
+    <div class="px-7 h-20 flex items-center justify-between border-b border-outline-light bg-surface-card shrink-0">
+      <div class="flex items-center gap-2"><span class="font-mono text-xs font-bold text-primary tracking-wider bg-primary-container px-2.5 py-1 rounded-full">#${f}</span>${stChip(o.estado, cancLabel(o))}</div>
+      <div class="flex items-center gap-1"><button onclick="act('etiqueta','${f}')" title="Etiqueta" class="w-9 h-9 rounded-full hover:bg-surface-soft flex items-center justify-center text-on-surface-variant">${ic('qr_code', 19)}</button><button onclick="closeDetail()" class="w-9 h-9 rounded-full hover:bg-surface-soft flex items-center justify-center text-on-surface-variant">${ic('close', 20)}</button></div>
+    </div>
+    <div id="detailScroll" class="flex-1 overflow-y-auto p-7 flex flex-col gap-5 [&>*]:shrink-0">
+      <div><h2 class="font-serif text-3xl tracking-tight">${esc(o.cliente.nombre)}</h2><p class="text-sm text-on-surface-variant">${esc(biciTxt(o.bici))} · ${esc(o.tiempo)}</p></div>
+      ${sec('Ciclo de la orden', flowHTML(o) + (na ? `<div class="flex flex-wrap items-center gap-2 pt-2">${na}</div>` : ''))}
+      ${o.cancel ? sec('Cancelación', `<div class="flex flex-col gap-2">${info('Motivo', o.cancel.motivo)}<div class="grid grid-cols-2 gap-2">${info('Quién', o.cancel.por)}${info('Cuándo', o.cancel.f)}</div>
+        ${o.revision === 'pendiente' ? `<div class="rounded-xl bg-warning-container text-warning text-xs px-3 py-2 flex items-center gap-1.5">${ic('gavel', 14)} Revisión de Óscar pendiente: ya hubo trabajo o pagos.</div>` : o.revision ? `<div class="text-[11px] text-success flex items-center gap-1">${ic('verified', 13)} Revisado por ${esc(o.revision.por)} · ${esc(o.revision.f)}${o.revision.nota ? ` · ${esc(o.revision.nota)}` : ''}</div>` : ''}
+        <p class="text-[11px] text-on-surface-variant">Cancelar no borra movimientos, no devuelve piezas al inventario ni elimina cobros de forma automática.</p></div>`) : ''}
+      <div class="grid grid-cols-2 gap-5">
+        ${sec('Cliente', `<div class="flex flex-col gap-2">${info('Nombre', o.cliente.nombre)}${info('Teléfono', o.cliente.tel)}</div>`)}
+        ${sec('Bicicleta', `<div class="grid grid-cols-2 gap-2">${info('Marca', o.bici.marca)}${info('Tipo', o.bici.tipo)}${info('Color', o.bici.color)}${info('Rodada', o.bici.rodada)}<div class="col-span-2">${info('Número de serie', o.bici.serie || 'No tiene')}</div></div>`)}
+      </div>
+      ${sec('Recepción', `<div class="flex flex-col gap-3">${info('Cómo llega', o.llegada)}${info('Trabajo solicitado', o.trabajo)}</div>`)}
+      ${sec('Mecánico responsable', mecH)}
+      ${sec('Presupuestos', `<div class="flex flex-col gap-3">${presH}</div>`, o.estado === 'reparacion' ? Bsm('Daño adicional', `act('adicional','${f}')`, 'add') : '')}
+      ${sec('Piezas utilizadas', piezasH)}
+      ${sec('Pagos', pagosH, pagosBtn)}
+      ${sec('Bitácora de observaciones', bitH, '', 'bitacora')}
+      ${!cancelable(o) ? '' : `<div class="flex items-center justify-between gap-3 px-1 pb-4"><p class="text-[11px] text-on-surface-variant max-w-sm">Las órdenes con movimientos y los presupuestos aceptados no se pueden borrar. Se puede cancelar con motivo desde cualquier estado antes de Entregada.</p><button onclick="act('cancelar','${f}')" class="text-xs font-semibold text-error hover:underline flex items-center gap-1">${ic('block', 15)} Cancelar con motivo</button></div>`}
+    </div>
+  </aside>`;
+  S.drawerAnim = false;
+  $('detailScroll').scrollTop = scroll;
+}
+function addBit(f) { const v = $('bitTxt').value.trim(); if (!v) return; log(byFolio(f), v); toast('Observación agregada', 'ok'); refresh(); }
+
+/* =========================================================
+   MODALES GENÉRICOS
+   ========================================================= */
+function openModal(html, w = 'max-w-2xl', type = 'static', data = {}) {
+  S.modal = {type, ...data};
+  $('modal').innerHTML = `<div class="fixed inset-0 z-[80] bg-on-surface/30 backdrop-blur-[2px] flex items-start justify-center p-6 overflow-y-auto" onmousedown="if(event.target===this)closeModal()"><div class="bg-surface-card rounded-3xl w-full ${w} my-8 shadow-2xl border border-outline-light pop-in">${html}</div></div>`;
+}
+function closeModal() { S.modal = null; $('modal').innerHTML = ''; }
+function toast(msg, type = 'ok') {
+  const st = {ok:['bg-tertiary-dark text-white', 'check_circle'], err:['bg-error text-white', 'error'], warn:['bg-warning text-white', 'sync_problem'], info:['bg-on-surface text-white', 'info']}[type];
+  const el = document.createElement('div');
+  el.className = `toast-in pointer-events-auto px-4 py-3 rounded-2xl shadow-xl text-sm font-medium flex items-center gap-2 max-w-md ${st[0]}`;
+  el.innerHTML = `${ic(st[1], 18)}<span>${esc(msg)}</span>`;
+  $('toasts').appendChild(el);
+  setTimeout(() => { el.style.transition = 'opacity .3s'; el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 3600);
+}
+
+/* ---------- Dispatcher de acciones ---------- */
+const ACT_PERM = {asignar:'asignar', llego:'inventario', autorizar:'precios', revisar:'revisar'};
+function act(a, f) {
+  if (ACT_PERM[a] && !can(ACT_PERM[a])) return soloOscar(ACT_PERM[a]);
+  switch (a) {
+    case 'detalle': openDetail(f); break;
+    case 'bitacora': openDetail(f, 'bitacora'); break;
+    case 'etiqueta': openEtiqueta(f); break;
+    case 'presupuestar': openEditor(f, 'nuevo'); break;
+    case 'editarPres': openEditor(f, 'editar'); break;
+    case 'adicional': openEditor(f, 'adicional'); break;
+    case 'whatsapp': sendWhats(f); break;
+    case 'respuesta': openRespuesta(f); break;
+    case 'asignar': openAsignar(f); break;
+    case 'llego': openLlegada(f); break;
+    case 'cobrar': openCobro(f); break;
+    case 'devolver': openDevolver(f); break;
+    case 'cancelar': openCancelar(f); break;
+    case 'autorizar': openAutorizar(f); break;
+    case 'revisar': openRevision(f); break;
+    case 'ticket': toast(`Ticket de #${f} enviado a la impresora`, 'info'); break;
+  }
+}
+
+/* ---------- Nueva orden ---------- */
+function uniqueClients() {
+  const m = {};
+  const key = b => [b.marca, b.tipo, b.color, b.rodada, b.serie].join('|').toLowerCase();
+  S.orders.forEach(o => { const k = o.cliente.tel; m[k] = m[k] || {...o.cliente, bicis:[]}; if (!m[k].bicis.some(b => key(b) === key(o.bici))) m[k].bicis.push(o.bici); });
+  return Object.values(m);
+}
+function openNuevaOrden() {
+  const sel = (id, opts) => `<select id="${id}" class="${INP} mt-1">${opts.map(x => `<option>${x}</option>`).join('')}</select>`;
+  const fld = (label, inner) => `<div><label class="text-xs font-medium text-on-surface-variant">${label}</label>${inner}</div>`;
+  openModal(`${mHead('Registrar cliente y bicicleta', `Folio ${nextFolio()} · se registra como Recibida · ${esc(me())}`)}
+  <div class="p-7 grid grid-cols-1 md:grid-cols-2 gap-7">
+    <div class="flex flex-col gap-4">
+      <h4 class="${LBL}">Cliente</h4>
+      <div class="relative">${fld('Nombre', `<input id="noNom" class="${INP} mt-1" placeholder="Busca un cliente o escribe uno nuevo" oninput="noSearch(this.value)" autocomplete="off">`)}<div id="noSug" class="absolute left-0 right-0 top-full mt-1 z-10"></div></div>
+      ${fld('Teléfono', `<input id="noTel" class="${INP} mt-1" placeholder="55 1234 5678">`)}
+      <div id="noBikes"></div>
+      <h4 class="${LBL} mt-2">Bicicleta</h4>
+      <div class="grid grid-cols-2 gap-3">
+        ${fld('Marca', `<input id="noMarca" class="${INP} mt-1" placeholder="Trek, Benotto…">`)}
+        ${fld('Tipo', sel('noTipo', ['Montaña', 'Ruta', 'Urbana', 'BMX', 'Infantil', 'Eléctrica', 'Otra']))}
+        ${fld('Color', `<input id="noColor" class="${INP} mt-1" placeholder="Negro mate">`)}
+        ${fld('Rodada', sel('noRodada', ['29', '27.5', '26', '24', '20', '16', '700c']))}
+        <div class="col-span-2">${fld('No. de serie <span class="text-on-surface-variant/60">(si lo tiene)</span>', `<input id="noSerie" class="${INP} mt-1" placeholder="Opcional">`)}</div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-4">
+      <h4 class="${LBL}">Recepción</h4>
+      ${fld('¿Cómo llega?', `<textarea id="noLleg" rows="3" class="${TA} mt-1" placeholder="Estado físico, golpes, accesorios que deja…"></textarea><div class="flex flex-wrap gap-1.5 mt-2">${['Llanta ponchada', 'Rayones en cuadro', 'Sin accesorios', 'Deja luces', 'Deja candado', 'Muy sucia'].map(t => `<button onclick="noChip('${t}')" class="px-2.5 py-1 rounded-full bg-surface-soft hover:bg-surface-muted text-[11px] font-medium text-on-surface-variant">+ ${t}</button>`).join('')}</div>`)}
+      ${fld('Trabajo solicitado', `<textarea id="noTrab" rows="4" class="${TA} mt-1" placeholder="Lo que pide el cliente…"></textarea>`)}
+      <div class="rounded-2xl bg-surface-soft p-4 text-xs text-on-surface-variant flex gap-2">${ic('info', 16, 'shrink-0')}<span>Después de registrarla crea el presupuesto: mano de obra y refacciones por separado. La orden pasa a <strong>Esperando aprobación</strong>.</span></div>
+    </div>
+  </div>
+  ${mFoot(B2('Cancelar', 'closeModal()') + B2('Guardar como Recibida', 'noSave(false)', 'save') + B1('Guardar y presupuestar', 'noSave(true)', 'request_quote'))}`, 'max-w-4xl');
+  setTimeout(() => $('noNom')?.focus(), 50);
+}
+function noChip(t) { const el = $('noLleg'); el.value += (el.value.trim() ? ', ' : '') + t; }
+function noSearch(v) {
+  const q = v.trim().toLowerCase(), qd = q.replace(/\D/g, '');
+  if (q.length < 2) { $('noSug').innerHTML = ''; return; }
+  const r = uniqueClients().filter(c => c.nombre.toLowerCase().includes(q) || (qd.length >= 3 && c.tel.replace(/\D/g, '').includes(qd))).slice(0, 5);
+  $('noSug').innerHTML = r.length ? `<div class="bg-surface-card border border-outline-light rounded-2xl shadow-lg p-1.5">${r.map(c => `<button onclick="noPick('${c.tel}')" class="w-full text-left px-3 py-2 rounded-xl hover:bg-surface-soft flex items-center justify-between text-xs"><span class="font-semibold">${esc(c.nombre)}</span><span class="text-on-surface-variant">${c.tel} · ${c.bicis.length} bici</span></button>`).join('')}<div class="px-3 py-1.5 text-[11px] text-on-surface-variant">o sigue escribiendo para un cliente nuevo</div></div>` : '';
+}
+function noPick(tel) {
+  const c = uniqueClients().find(x => x.tel === tel); S.noCli = c;
+  $('noNom').value = c.nombre; $('noTel').value = c.tel; $('noSug').innerHTML = '';
+  $('noBikes').innerHTML = `<div class="rounded-2xl bg-primary-container/50 p-3 flex flex-col gap-2"><span class="${LBL10}">Bicicletas registradas</span><div class="flex flex-wrap gap-1.5">${c.bicis.map((b, i) => `<button onclick="noBike(${i})" class="px-3 py-1.5 rounded-full bg-surface-card border border-outline-light hover:border-primary text-xs font-medium">${ic('pedal_bike', 14)} ${esc(biciTxt(b))}</button>`).join('')}</div></div>`;
+}
+function noBike(i) { const b = S.noCli.bicis[i]; $('noMarca').value = b.marca; $('noTipo').value = b.tipo; $('noColor').value = b.color; $('noRodada').value = b.rodada; $('noSerie').value = b.serie || ''; }
+function noSave(pres) {
+  const v = id => $(id).value.trim();
+  if (!v('noNom') || !v('noTel')) return toast('Captura nombre y teléfono del cliente', 'err');
+  if (!v('noMarca') || !v('noColor')) return toast('Captura marca y color de la bicicleta', 'err');
+  if (!v('noTrab')) return toast('Describe el trabajo solicitado', 'err');
+  const folio = nextFolio();
+  S.orders.push({folio, estado:'recibida', tiempo:'Hoy ' + hhmm(), cliente:{nombre:v('noNom'), tel:v('noTel')},
+    bici:{marca:v('noMarca'), tipo:v('noTipo'), color:v('noColor'), rodada:v('noRodada'), serie:v('noSerie')},
+    llegada:v('noLleg') || 'Sin observaciones.', trabajo:v('noTrab'), mec:null, pres:[], pagos:[], asig:[], bit:[BT(nowLbl(), me(), 'Recibida en mostrador.')]});
+  closeModal(); toast(`Orden #${folio} registrada como Recibida`, 'ok'); refresh();
+  if (pres) openEditor(folio, 'nuevo');
+}
+
+/* ---------- Editor de presupuesto ---------- */
+let ED = null;
+function openEditor(f, mode) {
+  const o = byFolio(f);
+  if (mode === 'nuevo') {
+    if (o.estado !== 'recibida') return toast('Solo las órdenes Recibidas pueden recibir un primer presupuesto', 'err');
+    ED = {folio:f, mode, lockedMo:[], lockedRef:[], mo:[], ref:[], motivo:''};
+  } else if (mode === 'editar') {
+    const lp = latest(o);
+    if (!lp || lp.estado !== 'pendiente') return toast('Solo se edita un presupuesto pendiente. La versión aceptada no se modifica.', 'err');
+    ED = {folio:f, mode, lockedMo:lp.mo.filter(x => x.prev), lockedRef:lp.ref.filter(x => x.prev), mo:clone(lp.mo.filter(x => !x.prev)), ref:clone(lp.ref.filter(x => !x.prev)), motivo:lp.motivo || ''};
+  } else {
+    if (!canGo(o, 'aprobacion')) return toast('El daño adicional solo aplica a órdenes En reparación', 'err');
+    const ac = accepted(o);
+    ED = {folio:f, mode, lockedMo:ac.mo.map(x => ({...x, prev:true})), lockedRef:ac.ref.map(x => ({...x, prev:true})), mo:[], ref:[], motivo:''};
+  }
+  openModal(`<div id="edBox"></div>`, 'max-w-5xl', 'editor');
+  renderEditor();
+}
+function invOptions(sel) { return TIPOS.map(t => `<optgroup label="${t}">${S.inv.filter(i => i.tipo === t).map(i => `<option value="${i.id}" ${i.id === sel ? 'selected' : ''}>${i.tipo} ${i.variante} — ${i.stock} ${i.unidad}</option>`).join('')}</optgroup>`).join(''); }
+function edTotals() {
+  const mo = [...ED.lockedMo, ...ED.mo], ref = [...ED.lockedRef, ...ED.ref];
+  const moT = sum(mo.map(m => +m.p || 0)), rfT = sum(ref.map(lineTotal));
+  const esp = ref.some(r => r.especial), short = ref.some(r => r.inv && !r.propia && r.c > invOf(r.inv).stock);
+  const adj = [...ED.mo, ...ED.ref].some(ajustado);
+  return `<div class="rounded-2xl bg-surface-soft p-4 flex flex-col gap-2">
+    <div class="flex justify-between text-xs"><span class="text-on-surface-variant">Mano de obra</span><span class="font-mono">${money(moT)}</span></div>
+    <div class="flex justify-between text-xs"><span class="text-on-surface-variant">Refacciones</span><span class="font-mono">${money(rfT)}</span></div>
+    <div class="flex justify-between text-base pt-2 border-t border-outline"><span class="font-semibold">Total</span><strong class="font-mono">${money(moT + rfT)}</strong></div>
+    ${esp ? `<div class="text-[11px] text-info flex gap-1.5 pt-1">${ic('local_shipping', 14)} Incluye pieza especial: se pide anticipo (porcentaje por definir en Configuración).</div>` : ''}
+    ${short ? `<div class="text-[11px] text-warning flex gap-1.5">${ic('warning', 14)} Hay piezas sin existencia suficiente: al aceptar, la orden pasará a Esperando refacción.</div>` : ''}
+    ${adj ? (can('precios') ? `<div class="text-[11px] text-success flex gap-1.5">${ic('verified', 14)} Hay precios distintos al catálogo: al guardar quedan autorizados por usted.</div>`
+      : `<div class="text-[11px] text-warning font-semibold flex gap-1.5">${ic('gavel', 14)} Hay precios distintos al catálogo: Óscar debe autorizarlos antes de enviar el presupuesto al cliente.</div>`) : ''}
+  </div>`;
+}
+function renderEditor() {
+  const o = byFolio(ED.folio);
+  const title = ED.mode === 'adicional' ? 'Presupuesto por daño adicional' : ED.mode === 'editar' ? `Editar presupuesto v${latest(o).v}` : 'Nuevo presupuesto';
+  const priceIn = (kind, i, p) => `<div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant">$</span><input type="number" min="0" class="${INPs} pl-6 font-mono text-right" value="${p}" oninput="edSet('${kind}',${i},'p',this.value)" onchange="renderEditor()"></div>`;
+  const del = (kind, i) => `<button onclick="edDel('${kind}',${i})" class="w-8 h-8 rounded-full hover:bg-error-container hover:text-error text-on-surface-variant flex items-center justify-center">${ic('close', 16)}</button>`;
+  const who = can('precios') ? 'lo autoriza usted al guardar' : 'requiere autorización de Óscar';
+  const adjTxt = l => !ajustado(l) ? '' : l.base === null ? `Sin precio de catálogo · ${who}` : `Precio base ${money(l.base)} · ajustado: ${who}`;
+  const moRows = ED.mo.map((m, i) => `<div class="flex flex-col gap-1"><div class="grid grid-cols-[1fr_120px_32px] gap-2 items-center"><input class="${INPs}" value="${esc(m.d)}" placeholder="Descripción de la mano de obra" oninput="edSet('mo',${i},'d',this.value)">${priceIn('mo', i, m.p)}${del('mo', i)}</div>${ajustado(m) ? `<span class="text-[11px] ${can('precios') ? 'text-on-surface-variant' : 'text-warning font-medium'} pl-1">${ic('gavel', 12)} ${adjTxt(m)}</span>` : ''}</div>`).join('');
+  const refRows = ED.ref.map((r, i) => {
+    const it = r.inv && invOf(r.inv), short = it && !r.propia && r.c > it.stock;
+    return `<div class="rounded-2xl border ${short ? 'border-warning/40 bg-warning-container/40' : 'border-outline-light'} p-3 flex flex-col gap-2">
+      <div class="grid grid-cols-[1fr_76px_120px_32px] gap-2 items-center">
+        ${r.especial ? `<input class="${INPs}" value="${esc(r.d)}" placeholder="Pieza especial (se pide al proveedor)" oninput="edSet('ref',${i},'d',this.value)">` : `<select class="${INPs}" onchange="edSet('ref',${i},'inv',this.value)">${invOptions(r.inv)}</select>`}
+        <input type="number" min="1" class="${INPs} text-center" value="${r.c}" onchange="edSet('ref',${i},'c',this.value)" title="Cantidad${it && it.unidad === 'ml' ? ' en ml' : ''}">
+        ${priceIn('ref', i, r.p)}${del('ref', i)}
+      </div>
+      <div class="flex items-center justify-between gap-2 text-[11px]">
+        <label class="flex items-center gap-1.5 text-on-surface-variant cursor-pointer"><input type="checkbox" class="rounded border-outline text-primary focus:ring-primary/30" ${r.propia ? 'checked' : ''} onchange="edSet('ref',${i},'propia',this.checked)"> La trae el cliente (solo se cobra mano de obra)</label>
+        <span class="${short ? 'text-warning font-semibold' : 'text-on-surface-variant'}">${r.especial ? 'Pedido especial · requiere anticipo' : `Existencia: ${it.stock} ${it.unidad}${it.unidad === 'ml' ? ' · precio por ml' : ''}${short ? ' · insuficiente' : ''}`}</span>
+      </div>${ajustado(r) ? `<span class="text-[11px] ${can('precios') ? 'text-on-surface-variant' : 'text-warning font-medium'}">${ic('gavel', 12)} ${adjTxt(r)}</span>` : ''}</div>`;
+  }).join('');
+  const locked = ED.lockedMo.length || ED.lockedRef.length ? `<div class="rounded-2xl bg-surface-soft border border-outline-light p-4 flex flex-col gap-2"><div class="flex items-center gap-1.5 ${LBL10}">${ic('lock', 14)} Aprobado anteriormente · se conserva sin cambios</div>${[...ED.lockedMo.map(m => [m.d, money(m.p)]), ...ED.lockedRef.map(r => [refLabel(r), r.propia ? 'Cliente' : money(lineTotal(r))])].map(([d, v]) => `<div class="flex justify-between text-xs"><span>${esc(d)}</span><span class="font-mono text-on-surface-variant">${v}</span></div>`).join('')}</div>` : '';
+  const motivo = ED.mode === 'adicional' || ED.motivo ? `<div><label class="text-xs font-medium text-on-surface-variant">Daño adicional encontrado</label><input class="${INP} mt-1" value="${esc(ED.motivo)}" placeholder="Ej. llanta trasera con corte lateral" oninput="ED.motivo=this.value"><p class="text-[11px] text-on-surface-variant mt-1">No se hace el trabajo adicional hasta que el cliente acepte.</p></div>` : '';
+  $('edBox').innerHTML = `${mHead(title, `#${o.folio} · ${esc(o.cliente.nombre)} · ${esc(biciTxt(o.bici))}`)}
+  <div class="grid grid-cols-[260px_1fr] min-h-[480px]">
+    <div class="border-r border-outline-light p-5 flex flex-col gap-3 bg-surface-soft/40">
+      <span class="${LBL}">Catálogo de servicios</span>
+      <p class="text-[11px] text-on-surface-variant -mt-1">Precarga el precio base y las piezas sugeridas. Todo es editable.</p>
+      <div class="flex flex-col gap-0.5">${S.services.map(s => `<button onclick="edAddSvc('${s.id}')" class="text-left px-3 py-2 rounded-xl hover:bg-surface-card flex items-center justify-between gap-2 text-xs group"><span>${esc(s.nombre)}</span><span class="font-mono text-on-surface-variant group-hover:hidden">${money(s.precio)}</span><span class="material-symbols-outlined text-[16px] text-primary hidden group-hover:inline">add_circle</span></button>`).join('')}</div>
+    </div>
+    <div class="p-6 flex flex-col gap-5">
+      <div class="rounded-2xl bg-surface-soft/60 border border-outline-light/60 p-3"><span class="${LBL10}">Trabajo solicitado</span><p class="text-xs mt-0.5">${esc(o.trabajo)}</p></div>
+      ${motivo}${locked}
+      <div class="flex flex-col gap-2"><div class="flex items-center justify-between"><h4 class="${LBL}">Mano de obra</h4>${Bsm('Línea', 'edAddMo()', 'add')}</div>${moRows || '<p class="text-xs text-on-surface-variant italic">Agrega un servicio del catálogo o una línea libre.</p>'}</div>
+      <div class="flex flex-col gap-2"><div class="flex items-center justify-between"><h4 class="${LBL}">Refacciones</h4><div class="flex gap-2">${Bsm('Del inventario', 'edAddRef()', 'add')}${Bsm('Pieza especial', 'edAddEsp()', 'local_shipping')}</div></div>${refRows || '<p class="text-xs text-on-surface-variant italic">Sin refacciones.</p>'}</div>
+      <div id="edTot">${edTotals()}</div>
+    </div>
+  </div>
+  ${mFoot(B2('Cancelar', 'closeModal()') + B2('Guardar', 'edSave(false)', 'save') + ([...ED.mo, ...ED.ref].some(ajustado) && !can('precios') ? B1('Guardar y pedir autorización a Óscar', 'edSave(false)', 'gavel') : B1('Guardar y enviar por WhatsApp', 'edSave(true)', 'send')))}`;
+}
+function edSet(kind, i, field, val) {
+  const r = ED[kind][i];
+  if (field === 'p' || field === 'c') r[field] = Math.max(field === 'c' ? 1 : 0, +val || 0);
+  else r[field] = val;
+  if (field === 'inv') { r.p = r.base = invOf(val).precio; }
+  if (['inv', 'c', 'propia'].includes(field)) renderEditor(); else $('edTot').innerHTML = edTotals();
+}
+function edDel(kind, i) { ED[kind].splice(i, 1); renderEditor(); }
+function edAddMo() { ED.mo.push({d:'', p:0, base:null}); renderEditor(); }
+function edAddRef() { ED.ref.push({...RF(S.inv[0].id, 1), base:S.inv[0].precio}); renderEditor(); }
+function edAddEsp() { ED.ref.push({...ESP('', 0), base:null}); renderEditor(); }
+function edAddSvc(id) {
+  const s = S.services.find(x => x.id === id);
+  ED.mo.push({d:s.nombre, p:s.precio, base:s.precio});
+  s.piezas.forEach(pz => ED.ref.push({inv:pz.inv, c:pz.c, p:invOf(pz.inv).precio, base:invOf(pz.inv).precio, propia:false}));
+  renderEditor();
+}
+function edSave(send) {
+  const o = byFolio(ED.folio);
+  const moN = ED.mo.filter(m => m.d.trim()), refN = ED.ref.filter(r => r.inv || r.d.trim());
+  if (!moN.length && !refN.length) return toast('Agrega al menos una línea de mano de obra o refacción', 'err');
+  if (ED.mode === 'adicional' && !ED.motivo.trim()) return toast('Describe el daño adicional encontrado', 'err');
+  const mo = [...ED.lockedMo, ...moN], ref = [...ED.lockedRef, ...refN];
+  /* Autorizar precios: si recepción cambia un precio del catálogo, Óscar lo autoriza antes de enviarlo al cliente */
+  const adj = [...moN, ...refN].some(ajustado);
+  const aut = !adj ? undefined : can('precios') ? {por:me(), f:nowLbl()} : 'pendiente';
+  if (ED.mode === 'nuevo') {
+    const v = o.pres.length + 1; o.pres.push({v, estado:'pendiente', fecha:'Hoy', mo, ref, aut});
+    go(o, 'aprobacion', `Presupuesto v${v} creado (${money(presTotal(latest(o)))}). Pendiente de aprobación.`);
+  } else if (ED.mode === 'editar') {
+    Object.assign(latest(o), {mo, ref, aut, motivo:ED.motivo || latest(o).motivo}); log(o, `Presupuesto v${latest(o).v} editado antes de su aprobación.`);
+  } else {
+    const v = o.pres.length + 1; o.pres.push({v, estado:'pendiente', fecha:'Hoy', mo, ref, aut, motivo:ED.motivo, adicional:true});
+    go(o, 'aprobacion', `Daño adicional: ${ED.motivo}. Presupuesto v${v} conserva lo aprobado en v${v - 1}.`);
+    o.nota = ['pause_circle', 'Pausada', 'text-warning'];
+  }
+  o.usadas = null; o.tiempo = 'Cotizada hoy ' + hhmm(); if (!o.nota || o.estado === 'aprobacion') o.nota = o.nota?.[1] === 'Pausada' ? o.nota : ['schedule', 'Esperando', 'text-warning'];
+  if (aut === 'pendiente') { log(o, `Presupuesto v${latest(o).v} con precio ajustado: espera autorización de Óscar.`); o.nota = ['gavel', 'Precio por autorizar', 'text-warning']; }
+  else if (aut) log(o, `Precios ajustados del presupuesto v${latest(o).v} autorizados por ${me()}.`);
+  closeModal();
+  if (aut === 'pendiente') toast('Guardado. Óscar debe autorizar el precio ajustado antes de enviarlo al cliente.', 'warn');
+  else if (send) sendWhats(o.folio); else toast('Presupuesto guardado', 'ok');
+  refresh();
+}
+/* ---------- Autorizar precios (solo Óscar) ---------- */
+function openAutorizar(f) {
+  const o = byFolio(f), lp = latest(o);
+  if (!autPend(lp)) return toast('Este presupuesto no tiene precios por autorizar', 'info');
+  const lines = [...lp.mo.map(m => [m.d, m]), ...lp.ref.map(r => [refName(r), r])].filter(([, l]) => ajustado(l));
+  openModal(`${mHead('Autorizar precios', `#${f} · ${esc(o.cliente.nombre)} · presupuesto v${lp.v} · ${money(presTotal(lp))}`)}
+  <div class="p-7 flex flex-col gap-4">
+    <p class="text-sm text-on-surface-variant">Recepción ajustó estos precios respecto al catálogo. Al autorizarlos, recepción podrá enviar el presupuesto al cliente.</p>
+    <div class="rounded-2xl border border-outline-light overflow-hidden"><table class="w-full text-xs"><thead class="bg-surface-soft text-left"><tr><th class="px-4 py-2.5 font-semibold text-on-surface-variant">Línea</th><th class="px-4 py-2.5 font-semibold text-on-surface-variant text-right">Catálogo</th><th class="px-4 py-2.5 font-semibold text-on-surface-variant text-right">Propuesto</th></tr></thead>
+    <tbody>${lines.map(([d, l]) => `<tr class="border-t border-outline-light"><td class="px-4 py-2.5">${esc(d)}</td><td class="px-4 py-2.5 text-right font-mono text-on-surface-variant">${l.base === null ? '—' : money(l.base)}</td><td class="px-4 py-2.5 text-right font-mono font-semibold">${money(l.p)}</td></tr>`).join('')}</tbody></table></div>
+    <div class="rounded-2xl bg-surface-soft/60 p-4">${presLines(lp)}</div>
+  </div>
+  ${mFoot(B2('Cerrar', 'closeModal()') + B2('Editar yo mismo', `closeModal();act('editarPres','${f}')`, 'edit') + B1('Autorizar precios', `autConfirm('${f}')`, 'gavel'))}`, 'max-w-2xl');
+}
+function autConfirm(f) {
+  const o = byFolio(f), lp = latest(o); if (!autPend(lp)) return closeModal();
+  lp.aut = {por:me(), f:nowLbl()};
+  log(o, `Óscar autorizó los precios ajustados del presupuesto v${lp.v}. Recepción ya puede enviarlo al cliente.`);
+  o.nota = ['schedule', 'Esperando', 'text-warning'];
+  closeModal(); toast(`Precios de #${f} autorizados`, 'ok'); refresh();
+}
+function sendWhats(f) {
+  const o = byFolio(f), lp = latest(o);
+  if (!lp) return toast('Primero crea un presupuesto', 'err');
+  if (autPend(lp)) return toast('Óscar debe autorizar el precio ajustado antes de enviarlo al cliente', 'warn');
+  log(o, `Presupuesto v${lp.v} (${money(presTotal(lp))}) enviado por WhatsApp a ${o.cliente.tel}.`);
+  o.tiempo = 'WhatsApp hace un momento';
+  toast(`Presupuesto v${lp.v} enviado por WhatsApp a ${o.cliente.nombre}`, 'ok'); refresh();
+}
+
+/* ---------- Respuesta del cliente ---------- */
+const mechOptions = sel => Object.values(MECH).map(m => `<option value="${m.id}" ${m.id === sel ? 'selected' : ''}>${m.nombre} · ${carga(m.id)} activas</option>`).join('');
+function openRespuesta(f) {
+  const o = byFolio(f), lp = latest(o);
+  if (!lp || lp.estado !== 'pendiente') return toast('No hay presupuesto pendiente', 'err');
+  if (autPend(lp)) return toast('Óscar debe autorizar el precio ajustado antes de registrar la respuesta', 'warn');
+  const falt = faltantes(o, lp), adic = !!lp.adicional;
+  const mecBox = adic || o.mec ? `<p class="text-[11px] text-on-surface-variant">${ic('person', 13)} Responsable: <strong>${mName(o.mec)}</strong></p>`
+    : can('asignar') ? `<label class="${LBL}">Mecánico responsable</label><select id="respMec" class="${INP} mt-1.5"><option value="">Asignar después…</option>${mechOptions(o.mec)}</select><p class="text-[11px] text-on-surface-variant mt-1">Un solo responsable. Si se cambia, se conserva el historial.</p>`
+    : `<div class="rounded-2xl bg-surface-soft p-3 text-xs text-on-surface-variant flex gap-2">${ic('group', 16, 'shrink-0')}<span>Al aceptar, la orden queda <strong>por asignar</strong>: Óscar elige al mecánico responsable.</span></div>`;
+  const opt = (v, title, sub, checked) => `<label class="flex items-start gap-3 p-4 rounded-2xl border border-outline-light hover:border-primary/40 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-container/40 transition-all"><input type="radio" name="resp" value="${v}" ${checked ? 'checked' : ''} onchange="respToggle()" class="mt-0.5 text-primary focus:ring-primary/30"><div><div class="text-sm font-semibold">${title}</div><div class="text-xs text-on-surface-variant">${sub}</div></div></label>`;
+  openModal(`${mHead('Respuesta del cliente', `#${f} · ${esc(o.cliente.nombre)} · presupuesto v${lp.v} · ${money(presTotal(lp))}`)}
+  <div class="p-7 grid md:grid-cols-2 gap-7">
+    <div class="flex flex-col">${lp.motivo ? `<div class="rounded-2xl bg-warning-container/60 p-3 text-xs mb-3"><strong>Daño adicional:</strong> ${esc(lp.motivo)}</div>` : ''}${presLines(lp)}</div>
+    <div class="flex flex-col gap-3">
+      ${opt('acepta', 'Acepta', falt.length ? 'La orden pasa a <strong>Esperando refacción</strong> (falta pieza).' : adic ? 'Se hace el trabajo adicional: vuelve a <strong>En reparación</strong>.' : 'Se abre la orden: pasa a <strong>En reparación</strong>.', true)}
+      ${adic ? opt('rechaza', 'Rechaza el adicional', `El presupuesto v${lp.v} queda <strong>Rechazado</strong>. La orden sigue <strong>En reparación</strong> con lo aprobado antes; se conserva el trabajo y el cobro ya aceptados. <em>(Supuesto por validar.)</em>`)
+        : opt('rechaza', 'Rechaza', 'El presupuesto queda <strong>Rechazado</strong> y la orden pasa a <strong>Cancelada</strong> <em>(supuesto por validar)</em>. La bicicleta se devuelve sin cobro; no hay cobro por diagnóstico.')}
+      ${falt.length ? `<div class="rounded-2xl bg-info-container text-info p-3 text-xs flex flex-col gap-1"><div class="font-semibold flex items-center gap-1">${ic('local_shipping', 15)} Falta pieza</div>${falt.map(r => `<div>· ${esc(refLabel(r))}</div>`).join('')}<div class="text-on-surface-variant mt-1">Se permite aceptar; la pieza no se puede registrar como usada hasta tenerla.</div></div>` : ''}
+      <div id="respMecBox" class="pt-1">${mecBox}</div>
+    </div>
+  </div>
+  ${mFoot(B2('Cancelar', 'closeModal()') + B1('Confirmar respuesta', `respConfirm('${f}')`, 'check'))}`, 'max-w-4xl');
+}
+function respToggle() { const v = document.querySelector('input[name=resp]:checked').value; $('respMecBox').style.display = v === 'acepta' ? '' : 'none'; }
+/* El mecánico confirma las piezas desde su celular (vista de mecánico); el mostrador ya no lo hace. */
+function respConfirm(f) {
+  const o = byFolio(f), lp = latest(o), sel = document.querySelector('input[name=resp]:checked').value;
+  if (sel === 'acepta') {
+    const mec = $('respMec')?.value || '';
+    const falt = faltantes(o, lp).length > 0, to = falt ? 'refaccion' : 'reparacion';
+    if (!canGo(o, to)) return toast('Transición no permitida', 'err');
+    lp.estado = 'aceptado'; o.usadas = null;
+    go(o, to, `Cliente aceptó presupuesto v${lp.v}.${falt ? ' Falta pieza: Esperando refacción.' : lp.adicional ? ' Continúa la reparación con el trabajo adicional.' : ' Orden abierta.'}`);
+    if (mec && can('asignar')) assign(o, mec);
+    o.nota = !o.mec ? ['person_search', 'Por asignar', 'text-warning'] : falt ? ['local_shipping', 'Pieza pedida', 'text-info'] : ['build', 'Por iniciar', 'text-primary'];
+    o.tiempo = 'Aprobada hoy ' + hhmm();
+    toast(`#${f} aceptada · ${ST[to].label}${o.mec ? '' : ' · Óscar asigna al mecánico'}`, 'ok');
+  } else if (lp.adicional) {
+    lp.estado = 'rechazado'; o.usadas = null;
+    go(o, 'reparacion', `Cliente rechazó el presupuesto adicional v${lp.v}. Sigue en reparación con lo aprobado en v${accepted(o).v}.`);
+    o.nota = ['build', 'Sin adicional', 'text-primary']; o.tiempo = 'Adicional rechazado hoy ' + hhmm();
+    toast(`#${f}: adicional rechazado · sigue En reparación`, 'info');
+  } else {
+    lp.estado = 'rechazado';
+    if (go(o, 'cancelada', `Cliente rechazó el presupuesto inicial v${lp.v}. Orden cancelada; la bicicleta se devuelve sin cobro.`)) {
+      o.cancel = {motivo:'El cliente rechazó el presupuesto inicial.', por:me(), f:nowLbl()}; o.devuelta = false;
+      o.nota = ['undo', 'Por devolver', 'text-error']; o.tiempo = 'Cancelada hoy ' + hhmm();
+      toast(`#${f} cancelada · se devuelve sin cobro`, 'info');
+    }
+  }
+  closeModal(); refresh();
+}
+
+/* ---------- Asignar mecánico ---------- */
+function openAsignar(f) {
+  const o = byFolio(f);
+  openModal(`${mHead(o.mec ? 'Reasignar mecánico' : 'Asignar mecánico', `#${f} · ${esc(biciTxt(o.bici))}`)}
+  <div class="p-7 flex flex-col gap-2">
+    ${Object.values(MECH).map(m => { const c = carga(m.id); return `<label class="flex items-center justify-between gap-3 p-4 rounded-2xl border border-outline-light hover:border-primary/40 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary-container/40"><div class="flex items-center gap-3"><input type="radio" name="asg" value="${m.id}" ${m.id === o.mec ? 'checked' : ''} class="text-primary focus:ring-primary/30">${avatar(m.id, 'w-9 h-9 text-xs')}<div><div class="text-sm font-semibold">${m.nombre}${m.id === o.mec ? ' <span class="text-[11px] font-medium text-on-surface-variant">(actual)</span>' : ''}</div><div class="text-[11px] text-on-surface-variant">${c} órdenes activas</div></div></div><div class="w-24 h-1.5 rounded-full bg-surface-muted overflow-hidden"><div class="h-full ${c >= 4 ? 'bg-warning' : 'bg-primary'}" style="width:${Math.min(100, c / 6 * 100)}%"></div></div></label>`; }).join('')}
+    <p class="text-[11px] text-on-surface-variant mt-2">${ic('history', 13)} Al cambiar de mecánico se guarda quién estaba antes, quién hizo el cambio y cuándo.</p>
+  </div>
+  ${mFoot(B2('Cancelar', 'closeModal()') + B1('Confirmar', `asgConfirm('${f}')`, 'check'))}`, 'max-w-lg');
+}
+function asgConfirm(f) {
+  const el = document.querySelector('input[name=asg]:checked'); if (!el) return toast('Selecciona un mecánico', 'err');
+  const o = byFolio(f); if (el.value === o.mec) { closeModal(); return; }
+  assign(o, el.value); closeModal(); toast(`#${f} asignada a ${mName(el.value)}`, 'ok'); refresh();
+}
+function openAsignarA(mec) {
+  const libres = S.orders.filter(o => !o.mec && !isClosed(o) && o.estado !== 'cancelada');
+  openModal(`${mHead(`Asignar orden a ${mName(mec)}`, `${carga(mec)} órdenes activas`)}
+  <div class="p-7 flex flex-col gap-2">${libres.length ? libres.map(o => `<div class="flex items-center justify-between gap-3 p-3 rounded-2xl border border-outline-light"><div class="min-w-0"><div class="flex items-center gap-2"><span class="font-mono text-xs font-bold text-primary">#${o.folio}</span>${stChip(o.estado, null, true)}</div><div class="text-xs mt-1">${esc(o.cliente.nombre)} · ${esc(biciTxt(o.bici))}</div></div>${Bsm('Asignar', `assignTo('${o.folio}','${mec}')`, 'person_add')}</div>`).join('') : '<p class="text-sm text-on-surface-variant">No hay órdenes sin mecánico.</p>'}</div>
+  ${mFoot(B2('Cerrar', 'closeModal()'))}`, 'max-w-lg');
+}
+function assignTo(f, mec) { assign(byFolio(f), mec); toast(`#${f} asignada a ${mName(mec)}`, 'ok'); closeModal(); refresh(); }
+
+/* ---------- Confirmar piezas (lo usa la vista del mecánico) ---------- */
+function piezasConfirm(f, autor) {
+  const o = byFolio(f);
+  if (o.piezasOk) return toast('Las piezas ya se descontaron; no se aplica dos veces.', 'info');
+  const us = getUsadas(o); if (us.some(insuf)) return toast('Registro bloqueado: sin existencia suficiente', 'err');
+  const opId = o.piezasOpId || (o.piezasOpId = uid('OP'));
+  runOp({id:opId, kind:'piezas', folio:f, label:`Piezas de #${f}`, apply:() => {
+    if (o.piezasOk) return;
+    us.forEach(r => { if (r.inv && !r.propia) { const it = invOf(r.inv); it.stock = Math.max(0, it.stock - r.c); S.movs.unshift({f:nowLbl(), tipo:'Consumo', inv:r.inv, cant:-r.c, ref:f, usuario:autor, op:opId}); } });
+    o.piezasOk = true;
+    go(o, 'lista', `Piezas confirmadas y descontadas (${opId}). Lista para entregar.`, autor);
+    o.nota = ['check_circle', 'Listo', 'text-success']; o.tiempo = 'Lista hoy ' + hhmm();
+  }});
+}
+function piezasToRef(f, autor = OWNER) {
+  const o = byFolio(f), falt = getUsadas(o).filter(insuf).map(refLabel).join(', ');
+  if (go(o, 'refaccion', `Registro de piezas bloqueado por falta de existencia: ${falt}.`, autor)) {
+    o.nota = ['inventory', 'Falta pieza', 'text-info']; o.tiempo = 'Esperando pieza';
+    toast(`#${f} pasó a Esperando refacción`, 'info'); refresh();
+  }
+}
+
+/* ---------- Llegada de pieza ---------- */
+function openLlegada(f) {
+  const o = byFolio(f), falt = getUsadas(o).map((r, i) => [r, i]).filter(([r]) => insuf(r));
+  openModal(`${mHead('Registrar llegada de pieza', `#${f} · ${esc(o.cliente.nombre)}`)}
+  <div class="p-7 flex flex-col gap-3">
+    ${falt.length ? falt.map(([r, i]) => { const it = r.inv && invOf(r.inv); return `<div class="rounded-2xl border border-outline-light p-4 flex items-center justify-between gap-4"><div class="min-w-0"><div class="text-sm font-medium">${esc(refName(r))}</div><div class="text-[11px] text-on-surface-variant">${r.especial ? 'Pedido especial para esta orden' : `Se necesitan ${r.c} ${it.unidad} · existencia ${it.stock}`}</div></div>${r.especial ? `<label class="flex items-center gap-2 text-xs font-medium"><input type="checkbox" id="lleg${i}" class="rounded border-outline text-primary focus:ring-primary/30" checked> Llegó</label>` : `<div class="flex items-center gap-2"><span class="text-[11px] text-on-surface-variant">Entrada</span><input id="lleg${i}" type="number" min="0" value="${r.c - it.stock}" class="${INPs} w-20 text-center"></div>`}</div>`; }).join('')
+      : '<p class="text-sm text-on-surface-variant">No hay piezas pendientes.</p>'}
+    <p class="text-[11px] text-on-surface-variant">${ic('inventory_2', 13)} Las entradas se registran en el inventario como movimiento.</p>
+  </div>
+  ${mFoot(B2('Cancelar', 'closeModal()') + B1('Registrar y continuar reparación', `llegConfirm('${f}')`, 'check'))}`, 'max-w-xl');
+}
+function llegConfirm(f) {
+  const o = byFolio(f), us = getUsadas(o);
+  us.forEach((r, i) => {
+    const el = $('lleg' + i); if (!el) return;
+    if (r.especial) { if (el.checked) { r.llego = true; const ac = accepted(o)?.ref.find(x => x.especial && x.d === r.d); if (ac) ac.llego = true; } }
+    else { const q = Math.max(0, +el.value || 0); if (q > 0) { invOf(r.inv).stock += q; S.movs.unshift({f:nowLbl(), tipo:'Entrada', inv:r.inv, cant:q, ref:f, usuario:me(), op:uid('OP')}); } }
+  });
+  if (us.some(insuf)) { toast('Aún faltan piezas; la orden sigue en Esperando refacción', 'warn'); closeModal(); refresh(); return; }
+  go(o, 'reparacion', 'Llegó la pieza; inventario actualizado. Continúa la reparación.');
+  o.nota = ['build', 'Por iniciar', 'text-primary']; o.tiempo = 'Pieza recibida hoy ' + hhmm();
+  closeModal(); toast(`#${f} regresó a En reparación`, 'ok'); refresh();
+}
+
+/* ---------- Cobro y entrega ---------- */
+function openCobro(f) { openModal(`<div id="cobroBox"></div>`, 'max-w-4xl', 'cobro', {folio:f}); renderCobro(f); }
+function renderCobro(f) {
+  const o = byFolio(f), ac = accepted(o); if (!$('cobroBox')) return;
+  const s = saldo(o), lista = o.estado === 'lista';
+  const inFlight = o.pagos.some(p => ['por_comprobar', 'enviando'].includes(payEstado(p)));
+  const canDeliver = lista && s === 0 && !inFlight;
+  const metodo = m => `<button onclick="S.cobroMetodo='${m}';renderCobro('${f}')" class="flex-1 h-10 rounded-xl text-sm font-semibold flex items-center justify-center gap-1.5 transition-all ${S.cobroMetodo === m ? 'bg-primary text-on-primary' : 'bg-surface-soft text-on-surface-variant hover:bg-surface-muted'}">${ic(m === 'Efectivo' ? 'payments' : 'account_balance', 17)}${m}</button>`;
+  $('cobroBox').innerHTML = `${mHead(lista ? 'Cobrar y entregar' : 'Registrar abono', `#${f} · ${esc(o.cliente.nombre)} · ${esc(biciTxt(o.bici))}`)}
+  <div class="p-7 grid md:grid-cols-2 gap-7">
+    <div class="flex flex-col"><span class="${LBL} mb-3">Presupuesto aceptado · v${ac.v}</span>${presLines(ac)}</div>
+    <div class="flex flex-col gap-4">
+      <div class="rounded-2xl ${s > 0 ? 'bg-error-container' : 'bg-success-container'} p-4 flex items-center justify-between"><div><div class="${LBL10} ${s > 0 ? '!text-error' : '!text-success'}">Saldo</div><div class="font-serif text-3xl ${s > 0 ? 'text-error' : 'text-success'}">${money(s)}</div></div><div class="text-right text-xs text-on-surface-variant"><div>Total ${money(total(o))}</div><div>Pagado ${money(pagado(o))}</div></div></div>
+      <div class="flex flex-col gap-1.5"><span class="${LBL10}">Abonos</span>${o.pagos.length ? o.pagos.map(p => { const e = payEstado(p); return `<div class="flex items-center justify-between gap-2 text-xs rounded-xl px-3 py-2 ${e === 'no_guardado' ? 'bg-error-container/40' : 'bg-surface-soft'}"><div><span class="font-medium">${p.tipo || 'Abono'}</span> <span class="text-on-surface-variant">· ${p.metodo} · ${p.fecha}</span>${p.opId ? `<div class="font-mono text-[10px] text-on-surface-variant">${p.opId}</div>` : ''}</div><div class="flex items-center gap-2"><span class="font-mono font-semibold ${e === 'no_guardado' ? 'line-through' : ''}">${money(p.monto)}</span>${opChip(e)}${e === 'por_comprobar' ? Bsm('Comprobar', `checkOp('${p.opId}')`) : e === 'no_guardado' ? Bsm('Reintentar', `retryOp('${p.opId}')`) : ''}</div></div>`; }).join('') : '<span class="text-xs text-on-surface-variant">Sin abonos todavía.</span>'}</div>
+      ${s > 0 && inFlight ? `<div class="rounded-2xl bg-warning-container text-warning p-4 text-xs flex gap-2">${ic('sync_problem', 16, 'shrink-0')}<span>Hay un pago por comprobar. Compruébalo antes de registrar otro para no cobrar dos veces.</span></div>` : ''}
+      ${s > 0 && !inFlight ? `<div class="rounded-2xl border border-outline-light p-4 flex flex-col gap-3"><span class="${LBL10}">Nuevo pago</span>
+        <div class="flex gap-2">${metodo('Efectivo')}${metodo('Transferencia')}</div>
+        <div class="flex gap-2"><div class="relative flex-1"><span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-on-surface-variant">$</span><input id="payMonto" type="number" min="1" max="${s}" value="${s}" class="${INP} pl-7 font-mono"></div>${B1('Registrar pago', `pagoAdd('${f}')`, 'add')}</div>
+        <p class="text-[11px] text-on-surface-variant">Cada pago lleva un identificador único y no se aplica dos veces, aunque falle la conexión.</p></div>` : ''}
+      ${lista ? `<div class="flex flex-col gap-2 pt-1">${B1('Entregar bicicleta', `entregar('${f}')`, 'task_alt', canDeliver ? '' : 'disabled')}<p class="text-[11px] text-center ${canDeliver ? 'text-success' : 'text-on-surface-variant'}">${canDeliver ? 'Saldo en cero. Lista para entregar.' : inFlight ? 'Comprueba los pagos pendientes antes de entregar.' : `${ic('lock', 12)} Solo se entrega con saldo en cero.`}</p></div>`
+        : `<p class="text-[11px] text-on-surface-variant">${ic('info', 13)} La entrega se habilita cuando la orden esté Lista para entregar.</p>`}
+    </div>
+  </div>`;
+}
+function pagoAdd(f) {
+  const o = byFolio(f), s = saldo(o), monto = Math.round(+$('payMonto').value || 0);
+  if (monto <= 0) return toast('Captura un monto válido', 'err');
+  if (monto > s) return toast(`El monto excede el saldo (${money(s)})`, 'err');
+  if (o.pagos.some(p => ['por_comprobar', 'enviando'].includes(payEstado(p)))) return toast('Comprueba el pago pendiente antes de registrar otro', 'warn');
+  const pay = {id:uid('PAG'), fecha:nowLbl(), monto, metodo:S.cobroMetodo, estado:'enviando', opId:uid('OP'), tipo: monto === s ? 'Liquidación' : (o.estado === 'lista' ? 'Abono' : 'Anticipo')};
+  o.pagos.push(pay);
+  runOp({id:pay.opId, kind:'pago', folio:f, label:`Pago ${money(monto)} #${f}`, apply:() => { pay.estado = 'guardado'; S.stats.semana[pay.metodo] += monto; log(o, `${pay.tipo} de ${money(monto)} en ${pay.metodo.toLowerCase()} (${pay.opId}).`); }});
+}
+function entregar(f) {
+  const o = byFolio(f);
+  if (saldo(o) > 0) return toast('Solo se entrega con saldo en cero', 'err');
+  if (go(o, 'entregada', `Entregada. Cobrado ${money(total(o))}. Saldo en cero.`)) {
+    o.entregadaF = 'hoy'; o.semana = true; o.tiempo = 'Entregada hoy ' + hhmm();
+    closeModal(); toast(`#${f} entregada a ${o.cliente.nombre}`, 'ok'); refresh();
+  }
+}
+
+/* ---------- Devolver / Cancelar / Etiqueta ---------- */
+function openDevolver(f) {
+  const o = byFolio(f);
+  openModal(`${mHead('Devolver sin cobro', `#${f} · ${esc(o.cliente.nombre)}`)}
+  <div class="p-7 text-sm text-on-surface-variant flex flex-col gap-3"><p>El cliente rechazó el presupuesto inicial y la orden quedó cancelada. La bicicleta se devuelve <strong class="text-on-surface">sin cobro</strong>; en esta versión no se cobra diagnóstico.</p><div class="rounded-2xl bg-surface-soft p-4 text-xs"><strong class="text-on-surface">Verifica al entregar:</strong> ${esc(o.llegada)}</div></div>
+  ${mFoot(B2('Cancelar', 'closeModal()') + B1('Confirmar devolución', `devConfirm('${f}')`, 'undo'))}`, 'max-w-lg');
+}
+function devConfirm(f) { const o = byFolio(f); o.devuelta = true; o.nota = null; o.tiempo = 'Devuelta hoy ' + hhmm(); log(o, 'Bicicleta devuelta al cliente sin cobro.'); closeModal(); toast(`#${f} devuelta sin cobro`, 'ok'); refresh(); }
+/* Cancelar con motivo desde cualquier estado antes de Entregada (supuesto). Si ya hubo trabajo o pagos, Óscar revisa antes de cerrar. */
+const huboTrabajo = o => !!accepted(o);
+function openCancelar(f) {
+  const o = byFolio(f), pg = pagado(o);
+  if (!cancelable(o)) return toast('Solo se cancela antes de Entregada', 'err');
+  const rev = huboTrabajo(o) || pg > 0;
+  openModal(`${mHead('Cancelar orden', `#${f} · ${esc(o.cliente.nombre)} · ${ST[o.estado].label}`)}
+  <div class="p-7 flex flex-col gap-3"><p class="text-sm text-on-surface-variant">Las órdenes con movimientos no se borran. Se cancela con motivo y se conserva todo su historial.</p>
+  <div class="rounded-2xl bg-surface-soft p-3 text-xs text-on-surface-variant flex gap-2">${ic('info', 15, 'shrink-0')}<span>Cancelar <strong>no</strong> devuelve piezas al inventario ni elimina cobros de forma automática.</span></div>
+  ${rev ? `<div class="rounded-2xl bg-warning-container text-warning p-3 text-xs flex gap-2">${ic('gavel', 15, 'shrink-0')}<span>Ya hubo ${[huboTrabajo(o) ? 'trabajo (presupuesto aceptado)' : '', pg > 0 ? `pagos (${money(pg)})` : ''].filter(Boolean).join(' y ')}. ${can('revisar') ? 'Como Óscar, al cancelar usted deja el caso revisado.' : 'La orden queda en <strong>revisión de Óscar</strong> antes de cerrarse.'}</span></div>` : ''}
+  <label class="text-xs font-medium text-on-surface-variant">Motivo (obligatorio)</label><textarea id="cancMot" rows="3" class="${TA}" placeholder="Ej. el cliente ya no quiere la reparación"></textarea></div>
+  ${mFoot(B2('Volver', 'closeModal()') + `<button onclick="cancConfirm('${f}')" class="h-11 px-5 rounded-full bg-error text-white text-sm font-semibold flex items-center gap-2">${ic('block', 18)} Cancelar orden</button>`)}`, 'max-w-lg');
+}
+function cancConfirm(f) {
+  const m = $('cancMot').value.trim(); if (!m) return toast('Escribe el motivo', 'err');
+  const o = byFolio(f), rev = huboTrabajo(o) || pagado(o) > 0;
+  if (!go(o, 'cancelada', `Orden cancelada. Motivo: ${m}`)) return;
+  o.cancel = {motivo:m, por:me(), f:nowLbl()}; o.tiempo = 'Cancelada hoy ' + hhmm(); o.nota = null;
+  if (rev) {
+    if (can('revisar')) o.revision = {por:me(), f:nowLbl(), nota:'Cancelada y revisada por Óscar.'};
+    else { o.revision = 'pendiente'; log(o, 'Ya hubo trabajo o pagos: pasa a revisión de Óscar antes de cerrarse.'); }
+  }
+  closeModal(); toast(`#${f} cancelada${o.revision === 'pendiente' ? ' · en revisión de Óscar' : ''}`, 'info'); refresh();
+}
+function openRevision(f) {
+  const o = byFolio(f); if (!enRevision(o)) return toast('Esta orden no está en revisión', 'info');
+  const ac = accepted(o);
+  openModal(`${mHead('Revisar cancelación', `#${f} · ${esc(o.cliente.nombre)} · cancelada por ${esc(o.cancel.por)}`)}
+  <div class="p-7 flex flex-col gap-4">
+    <div class="rounded-2xl bg-surface-soft p-4 text-sm"><span class="${LBL10}">Motivo</span><p class="mt-1">${esc(o.cancel.motivo)}</p><p class="text-[11px] text-on-surface-variant mt-1">${esc(o.cancel.f)}</p></div>
+    <div class="grid grid-cols-3 gap-2 text-center">${[['Aceptado', ac ? money(presTotal(ac)) : '—'], ['Pagado', money(pagado(o))], ['Piezas', o.piezasOk ? 'Descontadas' : 'Sin descontar']].map(([k, v]) => `<div class="rounded-2xl bg-surface-soft py-3"><div class="${LBL10}">${k}</div><div class="font-mono font-semibold text-sm">${v}</div></div>`).join('')}</div>
+    <p class="text-[11px] text-on-surface-variant">Los cobros y los movimientos de inventario se conservan. Si devuelve dinero o piezas, regístrelo por separado.</p>
+    <div><label class="text-xs font-medium text-on-surface-variant">Resolución (obligatoria)</label><textarea id="revNota" rows="3" class="${TA} mt-1" placeholder="Ej. se devolvió el anticipo en efectivo; la cadena queda en el taller"></textarea></div>
+  </div>
+  ${mFoot(B2('Volver', 'closeModal()') + B1('Marcar revisada y cerrar', `revConfirm('${f}')`, 'gavel'))}`, 'max-w-xl');
+}
+function revConfirm(f) {
+  const n = $('revNota').value.trim(); if (!n) return toast('Escribe la resolución', 'err');
+  const o = byFolio(f); o.revision = {por:me(), f:nowLbl(), nota:n};
+  log(o, `Revisión de Óscar: ${n}. Orden cerrada.`); closeModal(); toast(`#${f} revisada y cerrada`, 'ok'); refresh();
+}
+function openEtiqueta(f) {
+  const o = byFolio(f); let seed = [...f].reduce((a, c) => a + c.charCodeAt(0), 0);
+  const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  const cells = Array.from({length:21 * 21}, (_, i) => { const x = i % 21, y = Math.floor(i / 21); const fin = (x < 7 && y < 7) || (x > 13 && y < 7) || (x < 7 && y > 13); const on = fin ? (x % 6 === 0 || y % 6 === 0 || (x % 21 > 1 && x % 21 < 5 && y % 21 > 1 && y % 21 < 5) || (x > 15 && x < 19 && y > 1 && y < 5) || (x > 1 && x < 5 && y > 15 && y < 19) || x === 20 || y === 20) && !(x > 6 && x < 14) && !(y > 6 && y < 14) : rnd() > .5; return `<div class="${on ? 'bg-on-surface' : ''}"></div>`; }).join('');
+  openModal(`${mHead('Etiqueta de la bicicleta', 'Se pega en la bicicleta al recibirla')}
+  <div class="p-7 flex justify-center"><div class="w-[340px] rounded-2xl border-2 border-dashed border-outline p-5 flex gap-4 bg-white">
+    <div class="grid grid-cols-[repeat(21,1fr)] w-28 h-28 shrink-0">${cells}</div>
+    <div class="flex flex-col justify-between min-w-0"><div><div class="font-mono text-xl font-bold tracking-wider">#${f}</div><div class="text-xs font-semibold mt-1 truncate">${esc(o.cliente.nombre)}</div><div class="text-[11px] text-on-surface-variant truncate">${esc(biciTxt(o.bici))}</div><div class="text-[11px] text-on-surface-variant">${esc(o.cliente.tel)}</div></div><div class="text-[10px] text-on-surface-variant">${esc(S.tallerNombre)} · ${o.tiempo.includes('Hoy') ? '03 nov 2026' : esc(o.tiempo)}</div></div>
+  </div></div>
+  ${mFoot(B2('Cerrar', 'closeModal()') + B1('Imprimir', `toast('Etiqueta #${f} enviada a la impresora','info');closeModal()`, 'print'))}`, 'max-w-lg');
+}
+
+/* =========================================================
+   VISTA: PRESUPUESTOS
+   ========================================================= */
+function renderPresupuestos() {
+  let all = []; S.orders.forEach(o => o.pres.forEach(p => all.push({o, p})));
+  const cnt = e => all.filter(x => x.p.estado === e).length;
+  if (S.presTab !== 'todos') all = all.filter(x => x.p.estado === S.presTab);
+  const rank = {pendiente:0, aceptado:1, rechazado:2};
+  all.sort((a, b) => rank[a.p.estado] - rank[b.p.estado] || (autPend(b.p) - autPend(a.p)) || b.o.folio.localeCompare(a.o.folio) || b.p.v - a.p.v);
+  const cards = all.map(({o, p}) => {
+    const isLatest = latest(o) === p, f = o.folio;
+    const superseded = p.estado === 'aceptado' && o.pres.some(x => x.v > p.v && x.estado === 'aceptado');
+    const acts = p.estado === 'pendiente' && isLatest && autPend(p)
+      ? `<div class="grid grid-cols-2 gap-2">${btn2('edit', 'Editar', `act('editarPres','${f}')`)}${can('precios') ? btn1('gavel', 'Autorizar precios', `act('autorizar','${f}')`) : btnW('gavel', 'Espera a Óscar', 'Óscar debe autorizar el precio ajustado antes de enviarlo al cliente')}</div>`
+      : p.estado === 'pendiente' && isLatest
+      ? `<div class="grid grid-cols-3 gap-2">${btn2('edit', 'Editar', `act('editarPres','${f}')`)}${btn2('send', 'WhatsApp', `act('whatsapp','${f}')`)}${btn1('how_to_reg', 'Respuesta', `act('respuesta','${f}')`)}</div>`
+      : `<div class="grid grid-cols-1">${btn2('visibility', 'Ver orden', `act('detalle','${f}')`)}</div>`;
+    return `<article class="bg-surface-card rounded-3xl p-6 border ${autPend(p) ? 'border-warning ring-1 ring-warning/30' : p.estado === 'pendiente' ? 'border-warning/30' : 'border-outline-light'} flex flex-col gap-4 hover:shadow-md transition-all">
+      <div class="flex items-center justify-between gap-2"><div class="flex items-center gap-2"><span class="font-mono text-xs font-bold text-primary tracking-wider bg-primary-container px-2.5 py-1 rounded-full">#${f}</span><span class="font-mono text-[11px] font-bold text-on-surface-variant">v${p.v}</span><span class="text-[11px] text-on-surface-variant">${p.fecha}</span></div>${presChip(p.estado)}</div>
+      <div><h2 class="text-base font-semibold tracking-tight">${esc(o.cliente.nombre)}</h2><p class="text-xs text-on-surface-variant">${esc(biciTxt(o.bici))} · ${stChip(o.estado, cancLabel(o), true)}</p></div>
+      ${p.motivo ? `<div class="rounded-xl bg-warning-container/60 text-xs px-3 py-2"><strong>Daño adicional:</strong> ${esc(p.motivo)}</div>` : ''}
+      <div class="rounded-2xl bg-surface-soft/80 border border-outline-light/60 p-3">${presLines(p)}</div>
+      ${superseded ? `<p class="text-[11px] text-on-surface-variant -mt-2">${ic('lock', 12)} Conservada sin cambios; ampliada en una versión posterior.</p>` : ''}
+      ${acts}
+    </article>`;
+  }).join('');
+  const nAut = S.orders.filter(o => autPend(latest(o))).length;
+  return pageHead('Presupuestos', 'Mano de obra y refacciones por separado. Las versiones aceptadas no se modifican. Si recepción ajusta un precio, Óscar lo autoriza.', B1('Nuevo presupuesto', 'openNuevoPres()', 'add'))
+    + (nAut ? `<div class="rounded-2xl bg-warning-container/70 border border-warning/20 px-4 py-3 text-xs text-warning flex items-center gap-2">${ic('gavel', 16)} <span><strong>${nAut} presupuesto(s) con precio ajustado</strong> ${can('precios') ? 'esperan su autorización.' : 'esperan la autorización de Óscar; no se pueden enviar al cliente todavía.'}</span></div>` : '')
+    + `<div>${tabs([['todos', `Todos (${S.orders.reduce((a, o) => a + o.pres.length, 0)})`], ['pendiente', `Pendientes (${cnt('pendiente')})`], ['aceptado', `Aceptados (${cnt('aceptado')})`], ['rechazado', `Rechazados (${cnt('rechazado')})`]], S.presTab, 'setPresTab')}</div>`
+    + (cards ? `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${cards}</div>` : card('<p class="text-sm text-on-surface-variant text-center">Sin presupuestos en este estado.</p>', 'p-10'));
+}
+function setPresTab(t) { S.presTab = t; refresh(); }
+function openNuevoPres() {
+  const rec = S.orders.filter(o => o.estado === 'recibida');
+  openModal(`${mHead('Nuevo presupuesto', 'Elige una orden recibida o registra una nueva')}
+  <div class="p-7 flex flex-col gap-2">${rec.length ? rec.map(o => `<div class="flex items-center justify-between gap-3 p-4 rounded-2xl border border-outline-light"><div class="min-w-0"><div class="flex items-center gap-2"><span class="font-mono text-xs font-bold text-primary">#${o.folio}</span><span class="text-xs font-semibold">${esc(o.cliente.nombre)}</span></div><div class="text-[11px] text-on-surface-variant mt-0.5 truncate">${esc(biciTxt(o.bici))} · ${esc(o.trabajo)}</div></div>${Bsm('Presupuestar', `closeModal();openEditor('${o.folio}','nuevo')`, 'request_quote')}</div>`).join('') : '<p class="text-sm text-on-surface-variant">No hay órdenes recibidas sin presupuesto.</p>'}</div>
+  ${mFoot(B2('Cerrar', 'closeModal()') + B1('Nueva orden', 'closeModal();openNuevaOrden()', 'add'))}`, 'max-w-xl');
+}
+
+/* =========================================================
+   VISTA: INVENTARIO
+   ========================================================= */
+/* Un solo mínimo de reposición por variante (no tres niveles): solo se avisa al llegar al mínimo. */
+const enMinimo = it => it.min != null && it.stock <= it.min;
+function nivel(it) {
+  if (it.min == null) return chip('bg-surface-muted text-on-surface-variant', 'Mínimo sin definir');
+  if (enMinimo(it)) return chip('bg-error-container text-error', it.stock === 0 ? 'Agotado · reponer' : 'Llegó al mínimo · reponer', 'warning');
+  return '<span class="text-[11px] text-on-surface-variant">—</span>';
+}
+const FICT = `<span class="ml-1.5 px-1.5 py-0.5 rounded bg-surface-muted text-on-surface-variant text-[9px] font-bold tracking-wider align-middle">FICTICIO</span>`;
+const invName = id => { const it = invOf(id); return `${it.tipo} ${it.variante}`; };
+function renderInventario() {
+  const pend = S.correcciones.filter(c => c.estado === 'pendiente');
+  const agot = S.inv.filter(i => i.stock === 0).length, conMin = S.inv.filter(i => i.min != null), bajo = conMin.filter(enMinimo).length;
+  let body = '';
+  if (S.invTab === 'existencias') {
+    body = card(`<table class="w-full text-sm"><thead><tr class="text-left bg-surface-soft/70">${['Variante', 'Existencia', 'Mínimo de reposición', 'Aviso', 'Precio venta', ''].map((h, i) => `<th class="px-5 py-3 ${LBL10} ${i === 1 || i === 4 ? 'text-right' : ''}">${h}</th>`).join('')}</tr></thead><tbody>
+      ${TIPOS.map(t => { const its = S.inv.filter(i => i.tipo === t); return `<tr class="border-t border-outline-light bg-surface-soft/30"><td colspan="6" class="px-5 py-2 text-xs font-semibold">${t} <span class="text-on-surface-variant font-normal">· ${its.length} variante${its.length > 1 ? 's' : ''}</span></td></tr>`
+        + its.map(it => `<tr class="border-t border-outline-light/70 hover:bg-surface-soft/40"><td class="px-5 py-2.5 text-xs">${esc(it.variante)}${FICT}</td><td class="px-5 py-2.5 text-right font-mono text-xs font-semibold ${it.stock === 0 ? 'text-error' : ''}">${it.stock.toLocaleString('es-MX')} ${it.unidad}</td><td class="px-5 py-2.5"><input type="number" min="0" placeholder="—" value="${it.min ?? ''}" onchange="setMin('${it.id}',this.value)" class="w-20 h-8 px-2 rounded-lg border border-outline-light text-xs text-center focus:outline-none focus:ring-2 focus:ring-primary/20"></td><td class="px-5 py-2.5">${nivel(it)}</td><td class="px-5 py-2.5 text-right font-mono text-xs text-on-surface-variant">${money(it.precio)}${it.unidad === 'ml' ? '/ml' : ''}</td><td class="px-5 py-2.5 text-right">${Bsm('Entrada', `openEntrada('${it.id}')`, 'add')}</td></tr>`).join(''); }).join('')}
+    </tbody></table>`, 'overflow-hidden');
+  } else if (S.invTab === 'solicitudes') {
+    body = S.correcciones.length ? `<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">${S.correcciones.map(c => { const it = invOf(c.inv); return card(`<div class="flex items-center justify-between gap-2"><div class="flex items-center gap-2"><span class="font-mono text-xs font-bold text-primary bg-primary-container px-2.5 py-1 rounded-full">${c.id}</span><span class="text-[11px] text-on-surface-variant">${c.f}</span></div>${c.estado === 'pendiente' ? chip('bg-warning-container text-warning', 'Pendiente', 'schedule') : c.estado === 'aprobada' ? chip('bg-success-container text-success', 'Aprobada', 'check') : chip('bg-error-container text-error', 'Rechazada', 'close')}</div>
+      <div class="flex items-center gap-3">${avatar(c.mec, 'w-8 h-8 text-[11px]')}<div><div class="text-sm font-semibold">${mName(c.mec)} solicita ajustar</div><div class="text-xs text-on-surface-variant">${esc(invName(c.inv))}</div></div></div>
+      <div class="grid grid-cols-3 gap-2 text-center">${[['Existencia', `${it.stock} ${it.unidad}`], ['Ajuste', `${c.ajuste > 0 ? '+' : ''}${c.ajuste} ${it.unidad}`], ['Quedaría', `${it.stock + c.ajuste} ${it.unidad}`]].map(([k, v], i) => `<div class="rounded-2xl ${i === 1 ? (c.ajuste > 0 ? 'bg-success-container text-success' : 'bg-error-container text-error') : 'bg-surface-soft'} py-2"><div class="text-[10px] uppercase font-bold tracking-wider opacity-80">${k}</div><div class="font-mono text-sm font-semibold">${v}</div></div>`).join('')}</div>
+      <div class="text-xs flex flex-col gap-1"><div><span class="text-on-surface-variant">Movimiento original:</span> ${esc(c.mov)} <span class="text-[10px] text-on-surface-variant">(se conserva)</span></div><div><span class="text-on-surface-variant">Motivo:</span> ${esc(c.motivo)}</div>${c.por ? `<div class="text-[11px] text-on-surface-variant">${c.estado === 'aprobada' ? 'Autorizó' : 'Rechazó'} ${c.por} · ${c.fAut}</div>` : ''}</div>
+      ${c.estado === 'pendiente' ? `<div class="grid grid-cols-2 gap-2">${btn2('close', 'Rechazar', `corrResolve('${c.id}',false)`)}${btn1('check', 'Autorizar', `corrResolve('${c.id}',true)`)}</div>` : ''}`, 'p-5 flex flex-col gap-4'); }).join('')}</div>` : card('<p class="text-sm text-on-surface-variant text-center">Sin solicitudes.</p>', 'p-10');
+  } else {
+    body = card(`<table class="w-full text-sm"><thead><tr class="text-left bg-surface-soft/70">${['Fecha', 'Tipo', 'Artículo', 'Cantidad', 'Referencia', 'Usuario', 'Operación'].map(h => `<th class="px-5 py-3 ${LBL10}">${h}</th>`).join('')}</tr></thead><tbody>
+      ${S.movs.map(m => { const it = invOf(m.inv); return `<tr class="border-t border-outline-light/70 text-xs"><td class="px-5 py-2.5 text-on-surface-variant whitespace-nowrap">${m.f}</td><td class="px-5 py-2.5">${chip(m.tipo === 'Consumo' ? 'bg-primary-container text-primary' : m.tipo === 'Entrada' ? 'bg-success-container text-success' : 'bg-info-container text-info', m.tipo)}</td><td class="px-5 py-2.5">${esc(invName(m.inv))}</td><td class="px-5 py-2.5 font-mono font-semibold ${m.cant < 0 ? 'text-error' : 'text-success'}">${m.cant > 0 ? '+' : ''}${m.cant} ${it.unidad}</td><td class="px-5 py-2.5 font-mono">${m.ref}</td><td class="px-5 py-2.5">${esc(m.usuario)}</td><td class="px-5 py-2.5 font-mono text-[11px] text-on-surface-variant">${m.op}</td></tr>`; }).join('')}
+    </tbody></table>`, 'overflow-hidden');
+  }
+  return pageHead('Inventario & Refacciones', 'Existencias por variante. Nunca quedan en negativo y se descuentan una sola vez, al confirmar las piezas.', B2('Registrar entrada', `openEntrada('')`, 'add_box'))
+    + `<div class="rounded-2xl bg-warning-container/60 border border-warning/20 px-4 py-3 text-xs text-warning flex items-center gap-2">${ic('pending', 16)} <span><strong>Datos de prueba FICTICIOS.</strong> Existencias y lista de artículos son de ejemplo (pendiente: catálogo completo de Óscar). Cada variante tiene un solo mínimo de reposición, vacío hasta que Óscar lo envíe.</span></div>`
+    + `<div class="grid grid-cols-2 lg:grid-cols-4 gap-5">${kpi('Variantes', S.inv.length, `${TIPOS.length} tipos de artículo`, 'category')}${kpi('Agotadas', agot, 'Existencia en 0', 'remove_shopping_cart', 'text-error bg-error-container')}${kpi('En mínimo', conMin.length ? bajo : '—', conMin.length ? `${conMin.length} con mínimo definido` : 'Mínimos sin definir (pendiente)', 'trending_down', 'text-warning bg-warning-container')}${kpi('Solicitudes', pend.length, 'Correcciones por autorizar', 'rule', 'text-info bg-info-container')}</div>`
+    + `<div>${tabs([['existencias', 'Existencias'], ['solicitudes', `Solicitudes de corrección (${pend.length})`], ['movimientos', 'Movimientos']], S.invTab, 'setInvTab')}</div>` + body;
+}
+function setInvTab(t) { S.invTab = t; refresh(); }
+function setMin(id, v) { const it = invOf(id); it.min = v === '' ? null : Math.max(0, +v); refresh(); toast(`Mínimo de ${it.tipo} ${it.variante}: ${it.min ?? 'sin definir'}`, 'ok'); }
+function corrResolve(id, ok) {
+  const c = S.correcciones.find(x => x.id === id); if (!c || c.estado !== 'pendiente') return;
+  const it = invOf(c.inv);
+  if (ok) {
+    if (it.stock + c.ajuste < 0) return toast('La corrección dejaría la existencia en negativo', 'err');
+    it.stock += c.ajuste; S.movs.unshift({f:nowLbl(), tipo:'Corrección', inv:c.inv, cant:c.ajuste, ref:c.id, usuario:me(), op:uid('OP')});
+  }
+  c.estado = ok ? 'aprobada' : 'rechazada'; c.por = me(); c.fAut = nowLbl();
+  toast(ok ? `${c.id} autorizada: inventario corregido una vez` : `${c.id} rechazada`, ok ? 'ok' : 'info'); refresh();
+}
+function openEntrada(id) {
+  openModal(`${mHead('Registrar entrada', 'Compra o recepción de mercancía')}
+  <div class="p-7 flex flex-col gap-4"><div><label class="text-xs font-medium text-on-surface-variant">Artículo y variante</label><select id="entInv" class="${INP} mt-1">${invOptions(id || S.inv[0].id)}</select></div>
+  <div><label class="text-xs font-medium text-on-surface-variant">Cantidad</label><input id="entQty" type="number" min="1" value="1" class="${INP} mt-1"></div>
+  <div><label class="text-xs font-medium text-on-surface-variant">Referencia</label><input id="entRef" class="${INP} mt-1" placeholder="Proveedor / factura (opcional)"></div></div>
+  ${mFoot(B2('Cancelar', 'closeModal()') + B1('Registrar', 'entSave()', 'check'))}`, 'max-w-md');
+}
+function entSave() { const it = invOf($('entInv').value), q = Math.round(+$('entQty').value || 0); if (q <= 0) return toast('Cantidad inválida', 'err'); it.stock += q; S.movs.unshift({f:nowLbl(), tipo:'Entrada', inv:it.id, cant:q, ref:$('entRef').value.trim() || 'Compra', usuario:me(), op:uid('OP')}); closeModal(); toast(`+${q} ${it.unidad} · ${it.tipo} ${it.variante}`, 'ok'); refresh(); }
+
+/* =========================================================
+   VISTA: PERSONAL
+   ========================================================= */
+function renderPersonal() {
+  const hist = []; S.orders.forEach(o => o.asig.forEach(a => hist.push({...a, folio:o.folio})));
+  const cards = Object.values(MECH).map(m => {
+    const mine = S.orders.filter(o => o.mec === m.id && !isClosed(o) && o.estado !== 'cancelada');
+    const c = e => mine.filter(o => o.estado === e).length, activos = carga(m.id), alta = activos >= 4;
+    return `<article class="bg-surface-card rounded-3xl p-6 border border-outline-light flex flex-col gap-5">
+      <div class="flex items-center justify-between"><div class="flex items-center gap-3">${avatar(m.id, 'w-11 h-11 text-sm')}<div><h3 class="font-semibold tracking-tight">${m.nombre}</h3><span class="text-[11px] text-on-surface-variant">@${m.usuario} · Android</span></div></div>${chip(alta ? 'bg-warning-container text-warning' : 'bg-success-container text-success', alta ? 'Carga alta' : 'Disponible')}</div>
+      <div><div class="flex justify-between text-xs mb-1.5"><span class="text-on-surface-variant">Carga de trabajo</span><span class="font-semibold">${activos} activas</span></div><div class="h-2 rounded-full bg-surface-muted overflow-hidden"><div class="h-full rounded-full ${alta ? 'bg-warning' : 'bg-primary'}" style="width:${Math.min(100, activos / 6 * 100)}%"></div></div></div>
+      <div class="grid grid-cols-3 gap-2 text-center">${[['reparacion', 'En reparación'], ['refaccion', 'Esp. refacción'], ['lista', 'Listas']].map(([e, l]) => `<div class="rounded-2xl bg-surface-soft py-2.5"><div class="text-lg font-semibold">${c(e)}</div><div class="text-[10px] text-on-surface-variant">${l}</div></div>`).join('')}</div>
+      <div class="flex flex-col gap-1">${mine.length ? sortOrders(mine).map(o => `<button onclick="act('detalle','${o.folio}')" class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl hover:bg-surface-soft text-left"><div class="min-w-0 truncate"><span class="font-mono text-[11px] font-bold text-primary">#${o.folio}</span> <span class="text-xs">${esc(biciTxt(o.bici))}</span></div>${stChip(o.estado, null, true)}</button>`).join('') : '<p class="text-xs text-on-surface-variant italic px-3">Sin órdenes asignadas.</p>'}</div>
+      <button onclick="openAsignarA('${m.id}')" class="mt-auto h-10 rounded-full bg-primary hover:bg-primary-dark text-on-primary text-xs font-semibold flex items-center justify-center gap-1.5">${ic('person_add', 16)} Asignar orden</button>
+    </article>`;
+  }).join('');
+  return pageHead('Personal & Mecánicos', 'Cada orden tiene un solo mecánico responsable. Los cambios quedan registrados.')
+    + `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${cards}</div>`
+    + `<section class="flex flex-col gap-3"><h2 class="${LBL}">Historial de asignación</h2>${card(`<table class="w-full text-sm"><thead><tr class="text-left bg-surface-soft/70">${['Fecha', 'Orden', 'Mecánico anterior', 'Mecánico nuevo', 'Hizo el cambio'].map(h => `<th class="px-5 py-3 ${LBL10}">${h}</th>`).join('')}</tr></thead><tbody>${hist.reverse().map(h => `<tr class="border-t border-outline-light/70 text-xs"><td class="px-5 py-2.5 text-on-surface-variant">${h.f}</td><td class="px-5 py-2.5"><button onclick="act('detalle','${h.folio}')" class="font-mono font-bold text-primary hover:underline">#${h.folio}</button></td><td class="px-5 py-2.5">${h.de ? mName(h.de) : '<span class="text-on-surface-variant">—</span>'}</td><td class="px-5 py-2.5 font-semibold">${mName(h.a)}</td><td class="px-5 py-2.5">${h.por}</td></tr>`).join('')}</tbody></table>`, 'overflow-hidden')}</section>`;
+}
+
+/* =========================================================
+   VISTA: CATÁLOGO DE SERVICIOS
+   ========================================================= */
+let SV = null;
+function renderServicios() {
+  return pageHead('Catálogo de Servicios', 'Precio base y piezas sugeridas: precargan el presupuesto. El consumo real lo registra el mecánico.', B1('Nuevo servicio', 'openSvc(null)', 'add'))
+    + card(`<table class="w-full text-sm"><thead><tr class="text-left bg-surface-soft/70">${['Servicio', 'Precio base', 'Piezas sugeridas', ''].map(h => `<th class="px-5 py-3 ${LBL10}">${h}</th>`).join('')}</tr></thead><tbody>
+      ${S.services.map(s => `<tr class="border-t border-outline-light/70 hover:bg-surface-soft/40"><td class="px-5 py-3 text-sm font-medium">${esc(s.nombre)}</td>
+        <td class="px-5 py-3"><div class="relative w-28"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant">$</span><input type="number" min="0" value="${s.precio}" onchange="setSvcPrecio('${s.id}',this.value)" class="${INPs} pl-6 font-mono"></div></td>
+        <td class="px-5 py-3"><div class="flex flex-wrap gap-1.5">${s.piezas.length ? s.piezas.map(p => { const it = invOf(p.inv); return `<span class="px-2 py-0.5 rounded-full bg-surface-soft border border-outline-light text-[11px]">${esc(it.tipo + ' ' + it.variante)} · ${p.c}${it.unidad === 'ml' ? ' ml' : ''}</span>`; }).join('') : '<span class="text-[11px] text-on-surface-variant italic">Ninguna</span>'}</div></td>
+        <td class="px-5 py-3 text-right">${Bsm('Editar', `openSvc('${s.id}')`, 'edit')}</td></tr>`).join('')}
+    </tbody></table>`, 'overflow-hidden');
+}
+function setSvcPrecio(id, v) { const s = S.services.find(x => x.id === id); s.precio = Math.max(0, +v || 0); toast(`Precio base de “${s.nombre}”: ${money(s.precio)}`, 'ok'); }
+function openSvc(id) { SV = id ? clone(S.services.find(s => s.id === id)) : {id:null, nombre:'', precio:0, piezas:[]}; openModal('<div id="svBox"></div>', 'max-w-xl'); renderSv(); }
+function renderSv() {
+  $('svBox').innerHTML = `${mHead(SV.id ? 'Editar servicio' : 'Nuevo servicio', 'El precio y las piezas se pueden ajustar en cada presupuesto')}
+  <div class="p-7 flex flex-col gap-4">
+    <div class="grid grid-cols-[1fr_140px] gap-3"><div><label class="text-xs font-medium text-on-surface-variant">Nombre</label><input class="${INP} mt-1" value="${esc(SV.nombre)}" oninput="SV.nombre=this.value"></div><div><label class="text-xs font-medium text-on-surface-variant">Precio base</label><input type="number" min="0" class="${INP} mt-1 font-mono" value="${SV.precio}" oninput="SV.precio=+this.value||0"></div></div>
+    <div class="flex items-center justify-between"><span class="${LBL}">Piezas sugeridas</span>${Bsm('Pieza', `SV.piezas.push({inv:S.inv[0].id,c:1});renderSv()`, 'add')}</div>
+    ${SV.piezas.map((p, i) => `<div class="grid grid-cols-[1fr_80px_32px] gap-2 items-center"><select class="${INPs}" onchange="SV.piezas[${i}].inv=this.value">${invOptions(p.inv)}</select><input type="number" min="1" value="${p.c}" class="${INPs} text-center" oninput="SV.piezas[${i}].c=Math.max(1,+this.value||1)"><button onclick="SV.piezas.splice(${i},1);renderSv()" class="w-8 h-8 rounded-full hover:bg-error-container hover:text-error text-on-surface-variant flex items-center justify-center">${ic('close', 16)}</button></div>`).join('') || '<p class="text-xs text-on-surface-variant italic">Sin piezas sugeridas.</p>'}
+  </div>
+  ${mFoot(B2('Cancelar', 'closeModal()') + B1('Guardar', 'svSave()', 'save'))}`;
+}
+function svSave() {
+  if (!SV.nombre.trim()) return toast('Escribe el nombre del servicio', 'err');
+  if (SV.id) { const i = S.services.findIndex(s => s.id === SV.id); S.services[i] = SV; } else { SV.id = 's' + Date.now(); S.services.push(SV); }
+  closeModal(); toast('Servicio guardado', 'ok'); refresh();
+}
+
+/* =========================================================
+   VISTA: ESTADÍSTICAS
+   ========================================================= */
+function renderEstadisticas() {
+  const sem = S.stats.semana, cur = sem.Efectivo + sem.Transferencia;
+  const weeks = [...S.stats.weeks, ['2 nov', cur]], max = Math.max(...weeks.map(w => w[1]));
+  const activos = S.orders.filter(o => !isClosed(o) && o.estado !== 'cancelada');
+  const term = S.stats.terminadosBase + S.orders.filter(o => o.estado === 'entregada' && o.semana).length;
+  const porCobrar = sum(S.orders.filter(o => o.estado === 'lista').map(saldo));
+  const prom = Math.round(sum(weeks.slice(0, -1).map(w => w[1])) / (weeks.length - 1));
+  const estados = ['recibida', 'aprobacion', 'reparacion', 'refaccion', 'lista'], maxE = Math.max(1, ...estados.map(e => activos.filter(o => o.estado === e).length));
+  const chart = `<div class="flex items-end gap-3 h-60 pt-6">${weeks.map((w, i) => { const last = i === weeks.length - 1, h = Math.max(4, w[1] / max * 100); return `<div class="flex-1 h-full flex flex-col items-center justify-end gap-2 group"><span class="text-[11px] font-mono ${last ? 'text-primary font-semibold' : 'text-on-surface-variant font-semibold'} transition-opacity">${money(w[1])}</span><div class="w-full rounded-t-xl ${last ? 'bg-primary' : 'bg-primary-light/30 group-hover:bg-primary-light/60'} transition-colors" style="height:${h}%"></div><span class="text-[11px] ${last ? 'text-on-surface font-semibold' : 'text-on-surface-variant'}">${w[0]}</span></div>`; }).join('')}</div>`;
+  return pageHead('Cobros y reportes', 'Dinero cobrado y reparaciones del taller, explicados de forma sencilla.')
+    + `<div class="grid grid-cols-2 lg:grid-cols-4 gap-5">${kpi('Cobrado esta semana', money(cur), `${cur >= prom ? '▲' : '▼'} vs. promedio ${money(prom)}`, 'payments')}${kpi('Por cobrar', money(porCobrar), 'En bicicletas listas', 'pending_actions', 'text-error bg-error-container')}${kpi('Trabajos pendientes', activos.length, 'Órdenes abiertas', 'construction', 'text-warning bg-warning-container')}${kpi('Terminados esta semana', term, 'Bicicletas entregadas', 'task_alt', 'text-success bg-success-container')}</div>`
+    + `<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      ${card(`<div class="flex items-center justify-between"><div><h3 class="${LBL}">Ingresos cobrados por semana</h3><p class="text-xs text-on-surface-variant mt-0.5">Semana que inicia · últimas 8 semanas</p></div>${chip('bg-primary-container text-primary', 'Semana actual en curso')}</div>${chart}<p class="ux-chart-note">Cada barra representa lo cobrado durante una semana. La cifra encima indica el total en pesos.</p>`, 'p-6 lg:col-span-2')}
+      ${card(`<h3 class="${LBL}">Esta semana por método</h3><div class="flex flex-col gap-4 mt-4">${['Efectivo', 'Transferencia'].map(m => `<div><div class="flex justify-between text-xs mb-1.5"><span class="flex items-center gap-1.5">${ic(m === 'Efectivo' ? 'payments' : 'account_balance', 15)} ${m}</span><span class="font-mono font-semibold">${money(sem[m])}</span></div><div class="h-2 rounded-full bg-surface-muted overflow-hidden"><div class="h-full rounded-full ${m === 'Efectivo' ? 'bg-primary' : 'bg-tertiary'}" style="width:${cur ? sem[m] / cur * 100 : 0}%"></div></div></div>`).join('')}</div>
+        <div class="h-px bg-outline-light my-5"></div><h3 class="${LBL}">Pendientes por estado</h3><div class="flex flex-col gap-3 mt-4">${estados.map(e => { const n = activos.filter(o => o.estado === e).length; return `<div class="flex items-center gap-3"><span class="text-xs w-36 shrink-0">${ST[e].label}</span><div class="flex-1 h-2 rounded-full bg-surface-muted overflow-hidden"><div class="h-full rounded-full ${ST[e].dot}" style="width:${n / maxE * 100}%"></div></div><span class="text-xs font-semibold w-4 text-right">${n}</span></div>`; }).join('')}</div>`, 'p-6')}
+    </div>`;
+}
+
+/* =========================================================
+   VISTA: CONFIGURACIÓN
+   ========================================================= */
+function renderConfig() {
+  const row = (t, d, r) => `<div class="flex items-center justify-between gap-6 py-4 border-t border-outline-light first:border-0"><div><div class="text-sm font-medium">${t}</div><div class="text-xs text-on-surface-variant">${d}</div></div><div class="shrink-0">${r}</div></div>`;
+  const pendChip = chip('bg-error-container text-error', 'Pendiente');
+  const users = [[OWNER, 'Propietario', 'PC Windows · mostrador', 'Todo lo de recepción + autoriza precios y correcciones, catálogo, asignación, inventario y estadísticas', 'ÓR'],
+    [RECEP, 'Recepción', 'PC Windows · mostrador', 'Clientes, bicicletas, presupuestos, cobros y entregas', 'RE'],
+    ...Object.values(MECH).map(m => [m.nombre, 'Mecánico', 'Celular Android', 'Solo sus órdenes', m.id])];
+  return pageHead('Configuración', 'Datos del taller, usuarios, cobro e inventario.')
+    + `<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    ${card(`<h3 class="${LBL} mb-1">Taller</h3>
+      ${row('Nombre', 'Aparece en tickets y etiquetas', `<input class="${INPs} w-52" value="${esc(S.tallerNombre)}" onchange="S.tallerNombre=this.value;refresh()">`)}
+      ${row('Logo', 'Provisional: el taller todavía no tiene logo', `<div class="w-10 h-10 rounded-2xl bg-primary-container text-primary flex items-center justify-center font-serif text-2xl font-semibold">T</div>`)}
+      ${row('Folios', 'Un folio único por orden', `<span class="font-mono text-xs">Siguiente: <strong>${nextFolio()}</strong></span>`)}`, 'p-6')}
+    ${card(`<h3 class="${LBL} mb-1">Cobro y entrega</h3>
+      ${row('Métodos de pago', 'Normalmente se cobra todo al entregar', `<div class="flex gap-1.5">${chip('bg-success-container text-success', 'Efectivo', 'check')}${chip('bg-success-container text-success', 'Transferencia', 'check')}</div>`)}
+      ${row('Entrega con saldo en cero', 'Regla fija del taller', chip('bg-surface-muted text-on-surface-variant', 'Siempre', 'lock'))}
+      ${row('Anticipo por pieza especial', 'Porcentaje que se pide al comprar una pieza especial', `<div class="flex items-center gap-2">${pendChip}<div class="relative w-24"><input type="number" min="0" max="100" placeholder="—" value="${S.anticipoPct}" onchange="S.anticipoPct=this.value" class="${INPs} pr-7 text-right"><span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant">%</span></div></div>`)}`, 'p-6')}
+    ${card(`<h3 class="${LBL} mb-1">Usuarios</h3><p class="text-xs text-on-surface-variant mb-3">La cuenta de Óscar y la de recepción son cuentas separadas; no se juntan.</p><div class="flex flex-col gap-2">${users.map(u => `<div class="flex items-center justify-between gap-3 p-3 rounded-2xl bg-surface-soft/60"><div class="flex items-center gap-3">${avatar(u[4], 'w-9 h-9 text-xs')}<div><div class="text-sm font-semibold">${u[0]} <span class="text-[11px] font-medium text-on-surface-variant">· ${u[1]}</span></div><div class="text-[11px] text-on-surface-variant">${u[2]} · ${u[3]}</div></div></div>${Bsm('Restablecer acceso', `toast('Se envió un acceso nuevo a ${u[0]}','info')`, 'key')}</div>`).join('')}</div>`, 'p-6')}
+    ${card(`<h3 class="${LBL} mb-1">Inventario</h3>
+      ${row('Existencias negativas', 'Nunca se permiten; el registro de piezas se bloquea', chip('bg-surface-muted text-on-surface-variant', 'Bloqueado', 'lock'))}
+      ${row('Mínimos por artículo', 'Configurables desde Inventario; vacíos hasta definirlos', `<div class="flex items-center gap-2">${pendChip}${Bsm('Ir a inventario', `goView('inventario')`, 'arrow_forward')}</div>`)}
+      ${row('Catálogo de artículos y variantes', 'Lista completa por confirmar', pendChip)}
+      <h3 class="${LBL} mt-4 mb-1">Conexión y guardado</h3>
+      ${row('Simular fallos de conexión', 'Solo prototipo: pagos y piezas quedan “por comprobar” para probar el flujo', toggle(S.failSim, 'toggleFail()'))}`, 'p-6')}
+    </div>`;
+}
+function toggleFail() { S.failSim = !S.failSim; toast(S.failSim ? 'Simulación de fallos activada' : 'Conexión normal', S.failSim ? 'warn' : 'ok'); refresh(); }
+
+/* =========================================================
+   VISTA: MECÁNICO (Android)
+   ========================================================= */
+function mvMine() {
+  const ord = {reparacion:0, refaccion:1, aprobacion:2, recibida:3, lista:4};
+  return S.orders.filter(o => o.mec === S.mv.mec && !isClosed(o) && o.estado !== 'cancelada').sort((a, b) => ord[a.estado] - ord[b.estado]);
+}
+function mvSet(id) { S.mv = {mec:id, screen:'list', folio:null, msg:null}; refresh(); }
+function mvOpen(f) { S.mv.screen = 'detail'; S.mv.folio = f; S.mv.msg = null; refresh(); }
+function mvBack() { S.mv.screen = 'list'; S.mv.folio = null; S.mv.msg = null; refresh(); }
+function mvQty(i, d) { const o = byFolio(S.mv.folio), r = getUsadas(o)[i], step = r.inv && invOf(r.inv).unidad === 'ml' ? 5 : 1; r.c = Math.max(1, r.c + d * step); S.mv.msg = null; refresh(); }
+function mvDel(i) { getUsadas(byFolio(S.mv.folio)).splice(i, 1); S.mv.msg = null; refresh(); }
+function mvAdd() { const id = $('mvAddSel').value; if (!id) return; const it = invOf(id); getUsadas(byFolio(S.mv.folio)).push({inv:id, c:it.unidad === 'ml' ? 10 : 1, p:it.precio, propia:false, extra:true}); S.mv.msg = null; refresh(); }
+function mvTerminar() {
+  const o = byFolio(S.mv.folio), us = getUsadas(o), m = mName(S.mv.mec);
+  if (us.some(insuf)) { S.mv.msg = 'blocked'; refresh(); return; }
+  piezasConfirm(o.folio, m); S.mv.msg = o.piezasOk ? 'done' : 'pending'; refresh();
+}
+function mvToRef() { piezasToRef(S.mv.folio, mName(S.mv.mec)); S.mv.msg = null; }
+function mvObs() { const v = $('mvObsTxt').value.trim(); if (!v) return; log(byFolio(S.mv.folio), v, mName(S.mv.mec)); toast('Observación guardada', 'ok'); refresh(); }
+function mvDanio() {
+  const v = $('mvObsTxt').value.trim(); if (!v) return toast('Describe el daño en el campo de observación', 'err');
+  const o = byFolio(S.mv.folio); log(o, 'Daño adicional: ' + v, mName(S.mv.mec), 'daño');
+  S.avisos.unshift({f:nowLbl(), folio:o.folio, mec:S.mv.mec, txt:'Daño adicional: ' + v});
+  toast('Aviso enviado al mostrador para hacer el presupuesto adicional', 'ok'); refresh();
+}
+function mvCorrSend() {
+  const inv = $('mvCorrInv').value, aj = Math.round(+$('mvCorrAj').value || 0), mot = $('mvCorrMot').value.trim(), mov = $('mvCorrMov').value;
+  if (!aj) return toast('Indica el ajuste (+ o −)', 'err'); if (!mot) return toast('Escribe el motivo', 'err');
+  const n = Math.max(...S.correcciones.map(c => +c.id.split('-')[1])) + 1;
+  S.correcciones.unshift({id:'COR-' + String(n).padStart(3, '0'), mec:S.mv.mec, inv, mov, motivo:mot, ajuste:aj, estado:'pendiente', f:nowLbl()});
+  toast('Solicitud enviada. Óscar debe autorizarla.', 'ok'); S.mv.screen = S.mv.folio ? 'detail' : 'list'; refresh();
+}
+function mvScreen() {
+  const m = MECH[S.mv.mec];
+  const bar = (title, back) => `<div class="px-4 h-14 flex items-center gap-2 bg-surface-card border-b border-outline-light shrink-0">${back ? `<button onclick="${back}" class="w-9 h-9 -ml-1 rounded-full hover:bg-surface-soft flex items-center justify-center">${ic('arrow_back', 22)}</button>` : `<div class="w-8 h-8 rounded-xl bg-primary-container text-primary flex items-center justify-center font-serif text-lg font-semibold">T</div>`}<span class="font-semibold text-[15px] flex-1 truncate">${title}</span>${back ? '' : avatar(m.id, 'w-8 h-8 text-[11px]')}</div>`;
+  if (S.mv.screen === 'list') {
+    const mine = mvMine();
+    return bar('Mis órdenes') + `<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 [&>*]:shrink-0">
+      <div><div class="text-[13px] text-on-surface-variant">Hola,</div><div class="font-serif text-2xl tracking-tight">${m.nombre.split(' ')[0]}</div></div>
+      <div class="grid grid-cols-3 gap-2 text-center">${[['reparacion', 'En banco'], ['refaccion', 'Esp. pieza'], ['lista', 'Listas']].map(([e, l]) => `<div class="rounded-2xl bg-surface-card border border-outline-light py-2"><div class="text-lg font-semibold">${mine.filter(o => o.estado === e).length}</div><div class="text-[10px] text-on-surface-variant">${l}</div></div>`).join('')}</div>
+      ${mine.length ? mine.map(o => `<button onclick="mvOpen('${o.folio}')" class="text-left bg-surface-card rounded-2xl border border-outline-light p-4 flex flex-col gap-2 active:bg-surface-soft"><div class="flex items-center justify-between"><span class="font-mono text-[11px] font-bold text-primary">#${o.folio}</span>${stChip(o.estado, null, true)}</div><div class="text-sm font-semibold">${esc(biciTxt(o.bici))}</div><div class="text-xs text-on-surface-variant line-clamp-2">${esc(o.trabajo)}</div>${o.nota ? `<div class="text-[11px] ${o.nota[2]} font-medium flex items-center gap-1">${ic(o.nota[0], 13)} ${o.nota[1]}</div>` : ''}</button>`).join('') : '<p class="text-sm text-on-surface-variant text-center py-10">No tienes órdenes asignadas.</p>'}
+      <button onclick="S.mv.screen='correccion';S.mv.folio=null;refresh()" class="mt-1 h-11 rounded-full bg-surface-card border border-outline-light text-xs font-semibold flex items-center justify-center gap-1.5">${ic('rule', 16)} Solicitar corrección de inventario</button>
+    </div>`;
+  }
+  if (S.mv.screen === 'correccion') {
+    const mine = S.orders.filter(o => o.mec === S.mv.mec);
+    return bar('Corrección de inventario', S.mv.folio ? `S.mv.screen='detail';refresh()` : 'mvBack()') + `<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-4 [&>*]:shrink-0">
+      <p class="text-xs text-on-surface-variant">Óscar autoriza cada corrección. El movimiento original se conserva.</p>
+      <div><label class="text-xs font-medium text-on-surface-variant">Artículo</label><select id="mvCorrInv" class="${INP} mt-1">${invOptions()}</select></div>
+      <div><label class="text-xs font-medium text-on-surface-variant">Movimiento original</label><select id="mvCorrMov" class="${INP} mt-1"><option>Conteo físico</option>${mine.map(o => `<option ${o.folio === S.mv.folio ? 'selected' : ''}>Consumo en ${o.folio}</option>`).join('')}</select></div>
+      <div><label class="text-xs font-medium text-on-surface-variant">Ajuste propuesto (+ suma, − resta)</label><input id="mvCorrAj" type="number" class="${INP} mt-1" placeholder="Ej. 1 o -2"></div>
+      <div><label class="text-xs font-medium text-on-surface-variant">Motivo</label><textarea id="mvCorrMot" rows="3" class="${TA} mt-1" placeholder="¿Qué pasó?"></textarea></div>
+      <button onclick="mvCorrSend()" class="h-12 rounded-full bg-primary text-on-primary text-sm font-semibold flex items-center justify-center gap-2">${ic('send', 18)} Enviar solicitud</button>
+    </div>`;
+  }
+  const o = byFolio(S.mv.folio); if (!o) { S.mv.screen = 'list'; return mvScreen(); }
+  const ac = accepted(o), lp = latest(o), us = ac ? getUsadas(o) : [], edit = o.estado === 'reparacion' && !o.piezasOk;
+  const usedRows = us.map((r, i) => { const it = r.inv && invOf(r.inv), bad = insuf(r);
+    return `<div class="flex items-center justify-between gap-2 py-2.5 border-t border-outline-light first:border-0"><div class="min-w-0"><div class="text-[13px] font-medium truncate">${esc(refName(r))}</div><div class="text-[11px] ${bad && !o.piezasOk ? 'text-error font-semibold' : 'text-on-surface-variant'}">${r.propia ? 'La trajo el cliente' : r.especial ? (r.llego ? 'Pedido especial · llegó' : 'Pedido especial · por llegar') : `Existencia ${it.stock} ${it.unidad}${bad && !o.piezasOk ? ' · insuficiente' : ''}`}</div></div>
+      ${edit ? `<div class="flex items-center gap-1 shrink-0"><button onclick="mvQty(${i},-1)" class="w-8 h-8 rounded-full bg-surface-soft flex items-center justify-center">${ic('remove', 16)}</button><span class="w-12 text-center text-sm font-mono">${r.c}${it && it.unidad === 'ml' ? '<span class="text-[10px]">ml</span>' : ''}</span><button onclick="mvQty(${i},1)" class="w-8 h-8 rounded-full bg-surface-soft flex items-center justify-center">${ic('add', 16)}</button>${r.extra ? `<button onclick="mvDel(${i})" class="w-8 h-8 rounded-full text-on-surface-variant flex items-center justify-center">${ic('delete', 16)}</button>` : ''}</div>` : `<span class="text-sm font-mono shrink-0">${r.c}${it && it.unidad === 'ml' ? ' ml' : ''}</span>`}</div>`; }).join('');
+  const msg = S.mv.msg === 'blocked' ? `<div class="rounded-2xl bg-error-container text-error p-3 text-xs flex flex-col gap-2"><div class="flex gap-1.5"><span class="shrink-0">${ic('block', 16)}</span><span><strong>No hay existencia suficiente.</strong> El registro se bloquea; no se puede dejar el inventario en negativo.</span></div><button onclick="mvToRef()" class="h-9 rounded-full bg-error text-white text-xs font-semibold">Pasar a Esperando refacción</button></div>`
+    : S.mv.msg === 'done' ? `<div class="rounded-2xl bg-success-container text-success p-3 text-xs flex gap-1.5">${ic('check_circle', 16)} Piezas confirmadas y descontadas. La bici está lista para entregar.</div>`
+    : S.mv.msg === 'pending' || (o.piezasOpId && opById(o.piezasOpId)?.estado !== 'guardado' && !o.piezasOk) ? `<div class="rounded-2xl bg-warning-container text-warning p-3 text-xs flex flex-col gap-2"><span class="flex gap-1.5">${ic('sync_problem', 16)} No sabemos si se guardó. Comprueba antes de repetir.</span>${opById(o.piezasOpId)?.estado === 'por_comprobar' ? `<button onclick="checkOp('${o.piezasOpId}');S.mv.msg=null" class="h-9 rounded-full bg-warning text-white text-xs font-semibold">Comprobar</button>` : opById(o.piezasOpId)?.estado === 'no_guardado' ? `<button onclick="retryOp('${o.piezasOpId}');S.mv.msg=null" class="h-9 rounded-full bg-warning text-white text-xs font-semibold">Reintentar</button>` : ''}</div>` : '';
+  const sectionM = (t, inner) => `<div class="bg-surface-card rounded-2xl border border-outline-light p-4 flex flex-col gap-2"><span class="${LBL10}">${t}</span>${inner}</div>`;
+  return bar('#' + o.folio, 'mvBack()') + `<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-3 [&>*]:shrink-0">
+    <div class="flex items-start justify-between gap-2"><div><div class="text-lg font-semibold leading-tight">${esc(biciCorta(o.bici))}</div><div class="text-xs text-on-surface-variant">${esc(o.bici.tipo)} · R${esc(o.bici.rodada)}${o.bici.serie ? ' · Serie ' + esc(o.bici.serie) : ''} · ${esc(o.cliente.nombre)}</div></div>${stChip(o.estado, null, true)}</div>
+    ${o.estado === 'aprobacion' ? `<div class="rounded-2xl bg-warning-container text-warning p-3 text-xs flex gap-1.5">${ic('pause_circle', 16)} Esperando que el cliente apruebe v${lp.v}. No hagas el trabajo adicional todavía.</div>` : ''}
+    ${o.estado === 'refaccion' ? `<div class="rounded-2xl bg-info-container text-info p-3 text-xs flex gap-1.5">${ic('local_shipping', 16)} Esperando refacción. La pieza no se puede registrar hasta tenerla.</div>` : ''}
+    ${sectionM('Trabajo solicitado', `<p class="text-[13px]">${esc(o.trabajo)}</p><p class="text-[11px] text-on-surface-variant">Llegó: ${esc(o.llegada)}</p>`)}
+    ${ac ? sectionM('Trabajos aprobados', ac.mo.map(x => `<div class="text-[13px] flex items-center gap-1.5">${ic('check', 15, 'text-success')} ${esc(x.d)}</div>`).join('')) : ''}
+    ${ac ? sectionM(o.piezasOk ? 'Piezas confirmadas' : 'Piezas usadas', `<div>${usedRows || '<p class="text-xs text-on-surface-variant">Sin piezas.</p>'}</div>${edit ? `<div class="flex gap-2 pt-2 border-t border-outline-light"><select id="mvAddSel" class="${INPs} flex-1"><option value="">+ Agregar pieza usada…</option>${invOptions('')}</select><button onclick="mvAdd()" class="h-9 px-3 rounded-full bg-surface-soft text-xs font-semibold">Agregar</button></div>` : ''}`) : ''}
+    ${msg}
+    ${edit ? `<button onclick="mvTerminar()" class="h-12 rounded-full bg-primary text-on-primary text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">${ic('done_all', 18)} Terminar y confirmar piezas</button>` : ''}
+    ${sectionM('Observaciones', `<div class="flex flex-col gap-2">${[...o.bit].reverse().slice(0, 4).map(b => `<div><div class="text-[10px] text-on-surface-variant">${b.f} · ${esc(b.a)}</div><div class="text-xs ${b.tag === 'daño' ? 'text-warning font-medium' : ''}">${esc(b.t)}</div></div>`).join('')}</div>
+      <textarea id="mvObsTxt" rows="2" class="${TA} text-xs mt-1" placeholder="Escribe una observación…"></textarea>
+      <div class="grid grid-cols-2 gap-2"><button onclick="mvObs()" class="h-9 rounded-full bg-surface-soft text-xs font-semibold">Guardar nota</button>${o.estado === 'reparacion' ? `<button onclick="mvDanio()" class="h-9 rounded-full bg-warning-container text-warning text-xs font-semibold">Daño adicional</button>` : '<span></span>'}</div>`)}
+    <button onclick="S.mv.screen='correccion';refresh()" class="h-11 rounded-full bg-surface-card border border-outline-light text-xs font-semibold flex items-center justify-center gap-1.5">${ic('rule', 16)} Solicitar corrección de inventario</button>
+  </div>`;
+}
+function renderMecanico() {
+  return `<div class="flex flex-col lg:flex-row gap-12 items-start justify-center pt-2">
+    <div class="max-w-sm flex flex-col gap-6 lg:pt-10">
+      <div><span class="${LBL}">Celular Android · cada mecánico con su usuario</span><h1 class="font-serif text-3xl tracking-tight mt-1">Vista de mecánico</h1><p class="text-sm text-on-surface-variant mt-1.5">Solo ve sus órdenes. Anota observaciones, registra las piezas que realmente usó y solicita correcciones de inventario. Lo que hace aquí se refleja en el mostrador.</p></div>
+      <div class="flex flex-col gap-2"><span class="${LBL}">Ver como</span><div class="flex flex-wrap gap-2">${Object.values(MECH).map(x => `<button onclick="mvSet('${x.id}')" class="px-4 py-2 rounded-full text-xs font-semibold transition-all ${x.id === S.mv.mec ? 'bg-primary text-on-primary shadow-xs' : 'bg-surface-card border border-outline-light text-on-surface-variant hover:text-on-surface'}">${x.nombre}</button>`).join('')}</div></div>
+      ${card(`<div class="flex items-center gap-2 text-xs font-semibold">${ic('lightbulb', 16, 'text-primary')} Para probar</div><ul class="text-xs text-on-surface-variant flex flex-col gap-1.5 list-disc pl-4"><li>Como <strong>Mateo</strong>, abre #ORD-1080 y toca <em>Terminar</em>: las balatas SRAM están agotadas y el registro se bloquea.</li><li>Abre #ORD-1085 y confirma piezas: se descuentan del inventario una sola vez.</li><li>Como <strong>David</strong>, reporta un daño adicional en #ORD-1088: llega como notificación al mostrador.</li></ul>`, 'p-4 flex flex-col gap-2')}
+    </div>
+    <div class="w-[380px] h-[780px] rounded-[52px] bg-[#1C1C19] p-3 shadow-2xl shrink-0">
+      <div class="w-full h-full rounded-[42px] bg-background overflow-hidden flex flex-col relative">
+        <div class="h-9 px-6 flex items-center justify-between text-[12px] font-semibold bg-surface-card shrink-0"><span>${hhmm()}</span><div class="w-3 h-3 rounded-full bg-[#1C1C19]"></div><div class="flex items-center gap-1">${ic('signal_cellular_alt', 15)}${ic('wifi', 15)}${ic('battery_5_bar', 15)}</div></div>
+        ${mvScreen()}
+        <div class="h-6 flex items-center justify-center bg-surface-card shrink-0"><div class="w-28 h-1 rounded-full bg-on-surface/40"></div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* =========================================================
+   SIDEBAR, CABECERA, NOTIFICACIONES
+   ========================================================= */
+function renderSidebar() {
+  const activas = S.orders.filter(o => !isClosed(o)).length;
+  const presP = S.orders.filter(o => latest(o)?.estado === 'pendiente').length;
+  const corr = S.correcciones.filter(c => c.estado === 'pendiente').length;
+  const on = id => S.view === id;
+  const badge = (id, n) => `<span class="px-2 py-0.5 rounded-full ${on(id) ? 'bg-primary-dark/40 text-on-primary' : 'bg-surface-muted text-on-surface-variant'} text-xs font-semibold">${n}</span>`;
+  const sinMec = S.orders.filter(o => !o.mec && ['reparacion', 'refaccion'].includes(o.estado)).length;
+  const items = [
+    ['ordenes', 'construction', 'Reparaciones', badge('ordenes', activas)],
+    ['presupuestos', 'request_quote', 'Presupuestos', presP ? badge('presupuestos', presP) : ''],
+    ['inventario', 'inventory_2', 'Inventario y piezas', corr ? `<span class="w-2 h-2 rounded-full ${on('inventario') ? 'bg-on-primary' : 'bg-primary-light'}"></span>` : ''],
+    ['personal', 'group', 'Mecánicos y asignación', sinMec ? badge('personal', sinMec) : ''],
+    ['servicios', 'receipt_long', 'Catálogo de servicios', ''],
+    ['estadisticas', 'insights', 'Estadísticas', ''],
+    ['config', 'settings', 'Configuración', ''],
+  ].filter(([id]) => canView(id));
+  const R = ROLES[S.role];
+  const acct = r => `<button onclick="setRole('${r.id}')" class="flex-1 h-9 rounded-xl text-xs font-semibold transition-all ${S.role === r.id ? 'bg-primary text-on-primary shadow-xs' : 'text-on-surface-variant hover:bg-surface-muted'}">${r.id === 'oscar' ? 'Óscar' : 'Recepción'}</button>`;
+  const link = ([id, icon, label, right]) => `<a href="#" onclick="event.preventDefault();goView('${id}')" class="flex items-center justify-between px-3.5 py-2.5 rounded-full text-sm transition-all ${on(id) ? 'bg-primary text-on-primary font-medium shadow-sm' : 'text-on-surface-variant hover:bg-surface-soft hover:text-on-surface'}"><div class="flex items-center gap-3">${ic(icon, 19)}<span>${label}</span></div>${right}</a>`;
+  $('sidebar').innerHTML = `<div class="flex flex-col">
+    <div class="h-20 px-6 flex items-center gap-3 border-b border-outline-light"><div class="w-10 h-10 rounded-2xl bg-primary-container text-primary flex items-center justify-center font-serif text-2xl font-semibold shadow-xs">T</div><div class="flex flex-col"><span class="font-serif text-lg text-on-surface font-medium tracking-tight">${esc(S.tallerNombre)}</span><span class="text-[11px] font-semibold tracking-wider text-on-surface-variant uppercase">Taller de bicicletas</span></div></div>
+    <nav class="flex flex-col gap-1.5 p-4 mt-2">${items.map(link).join('')}
+      <div class="mt-4 mb-1 px-3.5 ${LBL10}">Demostración</div>
+      ${link(['mecanico', 'smartphone', 'Pantalla del mecánico', ''])}
+    </nav></div>
+    <div class="p-4 border-t border-outline-light flex flex-col gap-2">
+      <div class="p-2.5 rounded-2xl bg-surface-soft flex items-center gap-2.5"><div class="w-9 h-9 rounded-full ${S.role === 'oscar' ? 'bg-primary text-on-primary' : 'bg-tertiary-container text-tertiary'} flex items-center justify-center font-semibold text-xs shrink-0">${R.ini}</div><div class="flex flex-col min-w-0"><span class="text-xs font-semibold text-on-surface leading-tight truncate">${esc(R.nombre)}</span><span class="text-[10px] text-on-surface-variant font-medium">@${R.usuario} · ${R.rol} · PC mostrador</span></div></div>
+      <div><div class="${LBL10} px-1 mb-1">Demostración · cambiar de cuenta</div><div class="flex gap-1 p-1 rounded-2xl bg-surface-soft border border-outline-light">${acct(ROLES.recepcion)}${acct(ROLES.oscar)}</div></div>
+    </div>`;
+}
+function setRole(r) {
+  if (S.role === r) return;
+  S.role = r; closeModal(); closeDetail(); toggleNotif(false);
+  if (!canView(S.view)) S.view = 'ordenes';
+  toast(`Sesión iniciada como ${ROLES[r].nombre}`, 'info'); refresh();
+}
+function notifs() {
+  const n = [];
+  S.avisos.forEach(a => n.push({icon:'report', cls:'bg-warning-container text-warning', t:`${mName(a.mec)} · #${a.folio}`, s:a.txt, f:a.f, on:`act('detalle','${a.folio}')`}));
+  if (can('precios')) S.orders.filter(o => autPend(latest(o))).forEach(o => n.push({icon:'gavel', cls:'bg-warning-container text-warning', t:`#${o.folio} · precio ajustado por autorizar`, s:`${o.cliente.nombre} · ${money(presTotal(latest(o)))}`, f:o.tiempo, on:`act('autorizar','${o.folio}')`}));
+  if (can('revisar')) S.orders.filter(enRevision).forEach(o => n.push({icon:'gavel', cls:'bg-warning-container text-warning', t:`#${o.folio} · cancelación por revisar`, s:o.cancel.motivo, f:o.cancel.f, on:`act('revisar','${o.folio}')`}));
+  if (can('asignar')) S.orders.filter(o => !o.mec && ['reparacion', 'refaccion'].includes(o.estado)).forEach(o => n.push({icon:'person_add', cls:'bg-primary-container text-primary', t:`#${o.folio} · sin mecánico responsable`, s:o.cliente.nombre, f:o.tiempo, on:`act('asignar','${o.folio}')`}));
+  if (can('correcciones')) S.correcciones.filter(c => c.estado === 'pendiente').forEach(c => n.push({icon:'rule', cls:'bg-info-container text-info', t:'Corrección de inventario por autorizar', s:`${mName(c.mec)} · ${invName(c.inv)} (${c.ajuste > 0 ? '+' : ''}${c.ajuste})`, f:c.f, on:`goView('inventario','solicitudes')`}));
+  S.orders.filter(o => latest(o)?.estado === 'pendiente' && !autPend(latest(o)) && o.estado === 'aprobacion').forEach(o => n.push({icon:'schedule', cls:'bg-surface-muted text-on-surface-variant', t:`#${o.folio} espera respuesta del cliente`, s:`${o.cliente.nombre} · ${money(presTotal(latest(o)))}`, f:o.tiempo, on:`act('respuesta','${o.folio}')`}));
+  S.orders.filter(o => o.estado === 'lista').forEach(o => n.push({icon:'task_alt', cls:'bg-success-container text-success', t:`#${o.folio} lista para entregar`, s:`${o.cliente.nombre} · ${saldo(o) > 0 ? 'Resta ' + money(saldo(o)) : 'Saldo en cero'}`, f:o.tiempo, on:`act('cobrar','${o.folio}')`}));
+  return n;
+}
+function renderNotif() {
+  const n = notifs();
+  $('notifDot').style.display = S.avisos.length || (can('correcciones') && S.correcciones.some(c => c.estado === 'pendiente')) || (can('precios') && S.orders.some(o => autPend(latest(o)))) ? '' : 'none';
+  $('notifPanel').innerHTML = `<div class="px-5 py-4 flex items-center justify-between border-b border-outline-light"><span class="font-serif text-lg">Notificaciones</span>${S.avisos.length ? `<button onclick="S.avisos=[];refresh()" class="text-[11px] font-semibold text-primary hover:underline">Marcar avisos como vistos</button>` : ''}</div>
+    <div class="max-h-[420px] overflow-y-auto p-2">${n.map(x => `<button onclick="toggleNotif(false);${x.on}" class="w-full text-left flex gap-3 p-3 rounded-2xl hover:bg-surface-soft"><div class="w-8 h-8 rounded-xl ${x.cls} flex items-center justify-center shrink-0">${ic(x.icon, 17)}</div><div class="min-w-0"><div class="text-xs font-semibold">${esc(x.t)}</div><div class="text-[11px] text-on-surface-variant truncate">${esc(x.s)}</div><div class="text-[10px] text-on-surface-variant/70">${esc(x.f)}</div></div></button>`).join('') || '<p class="text-xs text-on-surface-variant p-4">Sin notificaciones.</p>'}</div>`;
+}
+function toggleNotif(force) { const p = $('notifPanel'); const show = force ?? p.classList.contains('hidden'); p.classList.toggle('hidden', !show); }
+function renderRole() {
+  const R = ROLES[S.role];
+  $('roleChip').className = `h-9 px-3.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 ${S.role === 'oscar' ? 'bg-primary text-on-primary' : 'bg-tertiary-container text-tertiary'}`;
+  $('roleChip').innerHTML = `${ic(S.role === 'oscar' ? 'admin_panel_settings' : 'storefront', 15)} ${S.view === 'mecanico' ? 'Demostración: celular' : 'Cuenta: ' + esc(R.nombre)}`;
+}
+function renderConn() {
+  $('connChip').className = `h-9 px-3.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 transition-colors ${S.failSim ? 'bg-warning-container text-warning' : 'bg-success-container text-success'}`;
+  $('connChip').innerHTML = S.failSim ? `${ic('wifi_off', 15)} Fallo simulado` : `${ic('wifi', 15)} Conexión normal`;
+}
+function opsBanner() {
+  const ops = S.ops.filter(o => o.estado !== 'guardado'); if (!ops.length) return '';
+  return `<div class="rounded-3xl border border-warning/30 bg-warning-container/70 p-4 flex flex-col gap-2">
+    <div class="flex items-center gap-2 text-warning text-sm font-semibold">${ic('sync_problem', 18)} Operaciones sin confirmar</div>
+    <p class="text-xs text-on-surface-variant -mt-1">Comprueba si se guardaron antes de repetirlas. Cada operación tiene un identificador único y no se aplica dos veces.</p>
+    ${ops.map(op => `<div class="flex items-center justify-between gap-3 bg-surface-card rounded-2xl px-4 py-2.5"><div class="flex items-center gap-3 text-xs min-w-0"><span class="font-mono font-bold text-primary">${op.id}</span><span class="truncate">${esc(op.label)}</span>${opChip(op.estado)}</div>${op.estado === 'por_comprobar' ? Bsm('Comprobar', `checkOp('${op.id}')`, 'fact_check') : Bsm('Reintentar', `retryOp('${op.id}')`, 'refresh')}</div>`).join('')}
+  </div>`;
+}
+
+/* =========================================================
+   NAVEGACIÓN Y RENDER
+   ========================================================= */
+const VIEWS = {ordenes:renderOrdenes, presupuestos:renderPresupuestos, inventario:renderInventario, personal:renderPersonal, servicios:renderServicios, estadisticas:renderEstadisticas, config:renderConfig, mecanico:renderMecanico};
+function goView(v, tab) { if (!canView(v)) return soloOscar(VIEW_PERM[v]); uxCloseNav(); S.view = v; if (tab && v === 'inventario') S.invTab = tab; if (tab && v === 'presupuestos') S.presTab = tab; closeDetail(); toggleNotif(false); window.scrollTo(0, 0); refresh(); }
+function onSearch(v) { S.search = v; if (S.view !== 'ordenes') { S.view = 'ordenes'; refresh(); } else { $('main').innerHTML = opsBanner() + renderOrdenes(); } }
+function clearSearch() { S.search = ''; $('orderSearchInput').value = ''; refresh(); }
+function printComandas() { toast(`Imprimiendo comandas de ${S.orders.filter(o => ['reparacion', 'refaccion'].includes(o.estado)).length} órdenes en taller`, 'info'); }
+function refresh() {
+  if (!canView(S.view)) S.view = 'ordenes';
+  renderSidebar(); renderRole(); renderConn(); renderNotif();
+  $('main').innerHTML = (S.view !== 'mecanico' ? opsBanner() : '') + VIEWS[S.view]();
+  $('fab').style.display = S.view === 'mecanico' ? 'none' : 'flex';
+  if (S.drawer) renderDetail();
+  if (S.modal?.type === 'cobro') renderCobro(S.modal.folio);
+}
+
+document.addEventListener('keydown', e => {
+  const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);
+  if (e.key === 'Escape') { if ($('uxTour').classList.contains('open')) { uxTourClose(); return; } uxCloseNav(); if (S.modal) closeModal(); else if (S.drawer) closeDetail(); else toggleNotif(false); return; }
+  if (typing || S.modal || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === 'f' || e.key === 'F') { e.preventDefault(); $('orderSearchInput').focus(); }
+  if (e.key === 'n' || e.key === 'N') { e.preventDefault(); openNuevaOrden(); }
+});
+document.addEventListener('click', e => { if (!$('notifWrap').contains(e.target)) toggleNotif(false); });
+
+/* Guía contextual sin alterar las reglas de negocio existentes */
+const UX_STEPS = [
+  {title:'Bienvenido a Taller al Día', text:'Demostración con datos ficticios. El mostrador tiene dos cuentas separadas: Recepción y Óscar. Puede cambiar de cuenta abajo a la izquierda.', view:'ordenes', role:'recepcion'},
+  {title:'1. Recepción registra la bicicleta', text:'Con el botón «Registrar bicicleta» se capturan el nombre y teléfono del cliente; la marca, tipo, color, rodada y número de serie (si lo tiene); cómo llega y qué trabajo pide. Se busca por folio, nombre o teléfono.', view:'ordenes', role:'recepcion'},
+  {title:'2. Recepción hace el presupuesto', text:'Mano de obra y refacciones por separado. Si recepción cambia un precio del catálogo, el presupuesto queda «Precio por autorizar» y no se envía al cliente hasta que Óscar lo autorice. Recepción también cobra y entrega con saldo en cero.', view:'presupuestos', role:'recepcion'},
+  {title:'3. El mecánico trabaja desde su celular', text:'Cada mecánico ve solo sus órdenes, anota observaciones, confirma las piezas que realmente usó (se descuentan una sola vez) y solicita correcciones de inventario.', view:'mecanico', role:'recepcion'},
+  {title:'4. Cuenta de Óscar', text:'Óscar puede hacer todo lo de recepción y, además, autorizar precios y correcciones de inventario y modificar el catálogo. Asignar mecánicos, administrar el inventario y ver estadísticas quedaron solo en su cuenta (supuesto por validar).', view:'ordenes', role:'oscar'},
+  {title:'5. Inventario y estadísticas', text:'Existencias por variante con un solo mínimo de reposición; bandeja de correcciones para autorizar. En Estadísticas: ingresos cobrados por semana y trabajos pendientes y terminados.', view:'inventario', role:'oscar'}
+];
+let uxStep = 0;
+function uxToggleNav() { document.body.classList.toggle('ux-nav-open'); }
+function uxCloseNav() { document.body.classList.remove('ux-nav-open'); }
+function uxTourOpen() { uxStep=0; $('uxTour').classList.add('open'); uxTourRender(); }
+function uxTourClose() { $('uxTour').classList.remove('open'); }
+function uxTourMove(delta) { if (uxStep+delta>=UX_STEPS.length) { uxTourClose(); return; } uxStep=Math.max(0,uxStep+delta); uxTourRender(); }
+function uxTourRender() {
+  const s=UX_STEPS[uxStep]; $('uxTourCount').textContent=`Paso ${uxStep+1} de ${UX_STEPS.length}`;
+  $('uxTourTitle').textContent=s.title; $('uxTourText').textContent=s.text;
+  $('uxTourBack').disabled=uxStep===0; $('uxTourBack').style.opacity=uxStep===0?'.35':'1';
+  $('uxTourNext').textContent=uxStep===UX_STEPS.length-1?'Finalizar':'Siguiente';
+  if (s.role && S.role!==s.role) { S.role=s.role; closeModal(); closeDetail(); }
+  if (S.view!==s.view) goView(s.view); else refresh();
+}
+refresh();
+</script>
+</body></html>

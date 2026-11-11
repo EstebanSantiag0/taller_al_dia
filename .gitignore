@@ -1,0 +1,87 @@
+# ── Dependencias ──────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+bower_components/
+vendor/
+
+# ── Python (si el backend lo usa) ─────────────────────────────
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# ── Compilación y salida ──────────────────────────────────────
+dist/
+build/
+out/
+.next/
+.nuxt/
+.svelte-kit/
+.output/
+.parcel-cache/
+.turbo/
+.cache/
+*.tsbuildinfo
+*.min.js.map
+
+# ── Pruebas y cobertura ───────────────────────────────────────
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+cypress/videos/
+cypress/screenshots/
+
+# ── Variables de entorno y secretos ───────────────────────────
+# Los secretos nunca van al repositorio (SRS v0.2, DEC-005).
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# ── Bases de datos locales ────────────────────────────────────
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# ── Registros ─────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Auxiliares de LaTeX (los PDF sí se versionan) ─────────────
+*.aux
+*.toc
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# ── Editores y sistema operativo ──────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+.directory
+
+# ── Claude Code (config personal, no del proyecto) ────────────
+.claude/settings.local.json
+docs/*
+CLAUDE.md
